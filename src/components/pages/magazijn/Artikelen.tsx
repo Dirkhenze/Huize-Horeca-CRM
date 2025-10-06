@@ -1,0 +1,1 @@
+export { Artikelen } from '../AllPages';

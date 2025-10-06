@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --huize-primary: #003DA5;
+  --huize-accent: #0047BA;
+  --huize-hover: #002B73;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900;
+  }
+}
+
+@layer utilities {
+  .huize-primary {
+    background-color: var(--huize-primary);
+  }
+
+  .huize-accent {
+    background-color: var(--huize-accent);
+  }
+
+  .huize-hover {
+    background-color: var(--huize-hover);
+  }
+
+  .huize-text-primary {
+    color: var(--huize-primary);
+  }
+}

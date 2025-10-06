@@ -1,0 +1,1 @@
+export { Besteladvies } from '../AllPages';
