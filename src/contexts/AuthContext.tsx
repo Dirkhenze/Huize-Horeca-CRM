@@ -17,6 +17,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const demoUser = localStorage.getItem('demo-user');
+    if (demoUser) {
+      setUser(JSON.parse(demoUser) as User);
+      setLoading(false);
+      return;
+    }
+
     supabase.auth.getSession()
       .then(({ data: { session } }) => {
         setUser(session?.user ?? null);
@@ -47,6 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    localStorage.removeItem('demo-user');
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   };
