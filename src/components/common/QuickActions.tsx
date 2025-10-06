@@ -1,4 +1,4 @@
-import { LucideIcon } from 'lucide-react';
+import { Video as LucideIcon } from 'lucide-react';
 
 interface QuickAction {
   id: string;
