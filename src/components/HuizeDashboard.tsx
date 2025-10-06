@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { NavCategory } from '../lib/types';
 import { TopBar } from './layout/TopBar';
 import { Sidebar } from './layout/Sidebar';
@@ -29,7 +29,11 @@ import { TopKansen } from './pages/trendz/TopKansen';
 import { Contacten } from './pages/contacten/Contacten';
 import { Instellingen } from './pages/settings/Instellingen';
 
-export function HuizeDashboard() {
+interface HuizeDashboardProps {
+  onLogout: () => void;
+}
+
+export function HuizeDashboard({ onLogout }: HuizeDashboardProps) {
   const [activeCategory, setActiveCategory] = useState<NavCategory>('sales');
   const [activePage, setActivePage] = useState('offertes');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -140,6 +144,7 @@ export function HuizeDashboard() {
         isOpen={menuOpen}
         onClose={() => setMenuOpen(false)}
         onNavigate={handlePageChange}
+        onLogout={onLogout}
       />
 
       <main className="ml-64 mt-16 p-8">

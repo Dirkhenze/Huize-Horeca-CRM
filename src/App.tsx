@@ -1,12 +1,42 @@
+import { useState } from 'react';
+import { HuizeDashboard } from './components/HuizeDashboard';
+import { Auth } from './components/Auth';
+
 function App() {
-  return (
-    <div className="min-h-screen bg-blue-500 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-xl">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Test Page</h1>
-        <p className="text-gray-600">If you see this, React is working!</p>
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = () => {
+    setIsLoading(true);
+    // Simulate login
+    setTimeout(() => {
+      setIsAuthenticated(true);
+      setIsLoading(false);
+    }, 500);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-16 h-16 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-600 to-blue-700">
+            <span className="text-2xl font-bold text-white">HH</span>
+          </div>
+          <div className="text-slate-600">Laden...</div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Auth onLogin={handleLogin} />;
+  }
+
+  return <HuizeDashboard onLogout={handleLogout} />;
 }
 
 export default App;

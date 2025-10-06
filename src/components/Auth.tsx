@@ -1,31 +1,30 @@
-import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useState } from 'react';
 import { LogIn, UserPlus } from 'lucide-react';
 
-export function Auth() {
+interface AuthProps {
+  onLogin: () => void;
+}
+
+export function Auth({ onLogin }: AuthProps) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    try {
-      if (isSignUp) {
-        await signUp(email, password);
+    setTimeout(() => {
+      if (email && password) {
+        onLogin();
       } else {
-        await signIn(email, password);
+        setError('Vul email en wachtwoord in');
       }
-    } catch (err: any) {
-      setError(err.message || 'Er is een fout opgetreden');
-    } finally {
       setLoading(false);
-    }
+    }, 500);
   };
 
   return (
