@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Offertes } from './pages/sales/Offertes';
 import { Prijzen } from './pages/sales/Prijzen';
 import { SalesAnalytics } from './pages/sales/SalesAnalytics';
+import { PriceUpload } from './pages/sales/PriceUpload';
 import { TeamPage } from './pages/common/TeamPage';
 
 import { ArtikelenInvoeren } from './pages/inkoop/ArtikelenInvoeren';
@@ -60,6 +61,8 @@ export function HuizeDashboard() {
             return <Offertes />;
           case 'prijzen':
             return <Prijzen />;
+          case 'price-upload':
+            return <PriceUpload />;
           case 'analytics':
             return <SalesAnalytics />;
           default:

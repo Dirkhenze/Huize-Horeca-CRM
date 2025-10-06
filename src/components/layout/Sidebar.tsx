@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavCategory } from '../../lib/types';
-import { FileText, DollarSign, Megaphone, Users, BarChart3, Package, TrendingUp, Truck, CircleUser as UserCircle, Route, Calendar, Warehouse, ShoppingCart, FileCheck, Percent, Building2, UserPlus, Sparkles, AlertTriangle, TrendingDown, Target, Activity } from 'lucide-react';
+import { FileText, DollarSign, Megaphone, Users, BarChart3, Package, TrendingUp, Truck, CircleUser as UserCircle, Route, Calendar, Warehouse, ShoppingCart, FileCheck, Percent, Building2, UserPlus, Sparkles, AlertTriangle, TrendingDown, Target, Activity, Upload } from 'lucide-react';
 
 interface SidebarProps {
   activeCategory: NavCategory;
@@ -12,6 +12,7 @@ const sidebarMenus: Record<NavCategory, { id: string; label: string; icon: any }
   sales: [
     { id: 'offertes', label: 'Offertes', icon: FileText },
     { id: 'prijzen', label: 'Prijzen', icon: DollarSign },
+    { id: 'price-upload', label: 'Prijslijst Uploaden', icon: Upload },
     { id: 'marketing', label: 'Marketing', icon: Megaphone },
     { id: 'team', label: 'Team', icon: Users },
     { id: 'analytics', label: 'Sales Analytics Dashboard', icon: BarChart3 },

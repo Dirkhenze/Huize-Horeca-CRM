@@ -73,24 +73,24 @@ export function TrendzDashboard({ onNavigate }: TrendzDashboardProps) {
         ))}
       </div>
 
-      <div className="mt-8 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-8 text-white">
+      <div className="mt-8 huize-gradient rounded-xl p-8 text-white shadow-xl">
         <h2 className="text-2xl font-bold mb-4">AI Powered Analytics</h2>
-        <p className="text-blue-100 mb-6">
+        <p className="text-white text-opacity-90 mb-6">
           Onze AI-engine analyseert real-time verkoop- en marktdata om actiebare inzichten te
           genereren. Ontdek nieuwe kansen, detecteer risico's en optimaliseer uw salesstrategie.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white bg-opacity-10 rounded-lg p-4">
+          <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-4 border border-white border-opacity-20">
             <p className="text-3xl font-bold mb-1">92%</p>
-            <p className="text-sm text-blue-100">Voorspellingsnauwkeurigheid</p>
+            <p className="text-sm text-white text-opacity-80">Voorspellingsnauwkeurigheid</p>
           </div>
-          <div className="bg-white bg-opacity-10 rounded-lg p-4">
+          <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-4 border border-white border-opacity-20">
             <p className="text-3xl font-bold mb-1">€ 340K</p>
-            <p className="text-sm text-blue-100">Extra omzet via AI</p>
+            <p className="text-sm text-white text-opacity-80">Extra omzet via AI</p>
           </div>
-          <div className="bg-white bg-opacity-10 rounded-lg p-4">
+          <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-4 border border-white border-opacity-20">
             <p className="text-3xl font-bold mb-1">156</p>
-            <p className="text-sm text-blue-100">Actieve inzichten</p>
+            <p className="text-sm text-white text-opacity-80">Actieve inzichten</p>
           </div>
         </div>
       </div>
