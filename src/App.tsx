@@ -1,25 +1,11 @@
-import { useState } from 'react';
 import { HuizeDashboard } from './components/HuizeDashboard';
 import { Auth } from './components/Auth';
+import { useAuth } from './contexts/AuthContext';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { user, loading } = useAuth();
 
-  const handleLogin = () => {
-    setIsLoading(true);
-    // Simulate login
-    setTimeout(() => {
-      setIsAuthenticated(true);
-      setIsLoading(false);
-    }, 500);
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-  };
-
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
@@ -32,11 +18,11 @@ function App() {
     );
   }
 
-  if (!isAuthenticated) {
-    return <Auth onLogin={handleLogin} />;
+  if (!user) {
+    return <Auth />;
   }
 
-  return <HuizeDashboard onLogout={handleLogout} />;
+  return <HuizeDashboard />;
 }
 
 export default App;

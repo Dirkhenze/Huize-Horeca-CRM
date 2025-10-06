@@ -4,6 +4,7 @@ import { TopBar } from './layout/TopBar';
 import { Sidebar } from './layout/Sidebar';
 import { UserMenu } from './layout/UserMenu';
 import { Breadcrumbs } from './layout/Breadcrumbs';
+import { useAuth } from '../contexts/AuthContext';
 
 import { Offertes } from './pages/sales/Offertes';
 import { Prijzen } from './pages/sales/Prijzen';
@@ -29,11 +30,8 @@ import { TopKansen } from './pages/trendz/TopKansen';
 import { Contacten } from './pages/contacten/Contacten';
 import { Instellingen } from './pages/settings/Instellingen';
 
-interface HuizeDashboardProps {
-  onLogout: () => void;
-}
-
-export function HuizeDashboard({ onLogout }: HuizeDashboardProps) {
+export function HuizeDashboard() {
+  const { signOut } = useAuth();
   const [activeCategory, setActiveCategory] = useState<NavCategory>('sales');
   const [activePage, setActivePage] = useState('offertes');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -144,7 +142,7 @@ export function HuizeDashboard({ onLogout }: HuizeDashboardProps) {
         isOpen={menuOpen}
         onClose={() => setMenuOpen(false)}
         onNavigate={handlePageChange}
-        onLogout={onLogout}
+        onLogout={signOut}
       />
 
       <main className="ml-64 mt-16 p-8">

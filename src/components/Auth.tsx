@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { LogIn, UserPlus } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
-interface AuthProps {
-  onLogin: () => void;
-}
-
-export function Auth({ onLogin }: AuthProps) {
+export function Auth() {
+  const { signIn, signUp } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,14 +15,17 @@ export function Auth({ onLogin }: AuthProps) {
     setError('');
     setLoading(true);
 
-    setTimeout(() => {
-      if (email && password) {
-        onLogin();
+    try {
+      if (isSignUp) {
+        await signUp(email, password);
       } else {
-        setError('Vul email en wachtwoord in');
+        await signIn(email, password);
       }
+    } catch (err: any) {
+      setError(err.message || 'Er is een fout opgetreden');
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   return (
