@@ -38,27 +38,36 @@ export function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl mb-4 huize-primary">
-            <span className="text-2xl font-bold text-white">HH</span>
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+      <div className="absolute inset-0 huize-gradient opacity-95"></div>
+      <div className="absolute inset-0" style={{
+        backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(227, 6, 19, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(0, 71, 186, 0.15) 0%, transparent 50%)'
+      }}></div>
+
+      <div className="relative z-10 bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+        <div className="huize-red p-6 text-center relative">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-16 -mt-16"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-5 rounded-full -ml-12 -mb-12"></div>
+          <div className="relative">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-lg mb-4">
+              <img src="/HH logo wit.png" alt="Huize Horeca" className="w-16 h-16 object-contain" />
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-1">Huize Horeca</h1>
+            <p className="text-white text-opacity-90 text-sm">
+              {isSignUp ? 'Maak een account aan' : 'Welkom terug'}
+            </p>
           </div>
-          <h1 className="text-3xl font-bold huize-text-primary mb-2">Huize Horeca</h1>
-          <p className="text-slate-600">
-            {isSignUp ? 'Maak een account aan' : 'Inloggen op uw account'}
-          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="p-8 space-y-5">
           {error && (
-            <div className="bg-red-50 text-red-700 px-4 py-3 rounded-lg text-sm">
+            <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-r text-sm">
               {error}
             </div>
           )}
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">
+            <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-2">
               E-mailadres
             </label>
             <input
@@ -67,13 +76,13 @@ export function Auth() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full px-4 py-3.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               placeholder="naam@huizehoreca.nl"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-semibold text-slate-700 mb-2">
               Wachtwoord
             </label>
             <input
@@ -83,7 +92,7 @@ export function Auth() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full px-4 py-3.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               placeholder="••••••••"
             />
           </div>
@@ -91,14 +100,14 @@ export function Auth() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full text-white py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2 huize-primary hover:huize-hover"
+            className="w-full text-white py-4 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 huize-primary hover:huize-hover shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
             {loading ? (
               'Bezig...'
             ) : isSignUp ? (
               <>
                 <UserPlus className="w-5 h-5" />
-                Aanmelden
+                Account Aanmaken
               </>
             ) : (
               <>
@@ -109,16 +118,18 @@ export function Auth() {
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <button
-            onClick={() => {
-              setIsSignUp(!isSignUp);
-              setError('');
-            }}
-            className="huize-text-primary hover:underline text-sm font-medium transition"
-          >
-            {isSignUp ? 'Heeft u al een account? Inloggen' : 'Nog geen account? Aanmelden'}
-          </button>
+        <div className="px-8 pb-8 pt-0 text-center border-t border-slate-100">
+          <div className="pt-6">
+            <button
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setError('');
+              }}
+              className="huize-text-primary hover:huize-text-red text-sm font-semibold transition-colors"
+            >
+              {isSignUp ? '← Terug naar inloggen' : 'Nog geen account? Aanmelden →'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

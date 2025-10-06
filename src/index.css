@@ -3,9 +3,11 @@
 @tailwind utilities;
 
 :root {
-  --huize-primary: #003DA5;
-  --huize-accent: #0047BA;
-  --huize-hover: #002B73;
+  --huize-blue: #003DA5;
+  --huize-blue-light: #0047BA;
+  --huize-blue-dark: #002B73;
+  --huize-red: #E30613;
+  --huize-red-dark: #B30510;
 }
 
 @layer base {
@@ -16,18 +18,38 @@
 
 @layer utilities {
   .huize-primary {
-    background-color: var(--huize-primary);
+    background-color: var(--huize-blue);
   }
 
   .huize-accent {
-    background-color: var(--huize-accent);
+    background-color: var(--huize-blue-light);
   }
 
   .huize-hover {
-    background-color: var(--huize-hover);
+    background-color: var(--huize-blue-dark);
   }
 
   .huize-text-primary {
-    color: var(--huize-primary);
+    color: var(--huize-blue);
+  }
+
+  .huize-red {
+    background-color: var(--huize-red);
+  }
+
+  .huize-red-hover {
+    background-color: var(--huize-red-dark);
+  }
+
+  .huize-text-red {
+    color: var(--huize-red);
+  }
+
+  .huize-gradient {
+    background: linear-gradient(135deg, var(--huize-blue) 0%, var(--huize-blue-light) 100%);
+  }
+
+  .huize-gradient-red {
+    background: linear-gradient(135deg, var(--huize-red) 0%, var(--huize-red-dark) 100%);
   }
 }
