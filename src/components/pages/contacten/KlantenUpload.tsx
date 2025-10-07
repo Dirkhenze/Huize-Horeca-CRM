@@ -273,14 +273,40 @@ export function KlantenUpload() {
         if (!user) throw new Error('Not authenticated');
         userId = user.id;
 
-        const { data: userCompanies } = await supabase
+        let { data: userCompanies } = await supabase
           .from('user_companies')
           .select('company_id')
           .eq('user_id', userId)
           .maybeSingle();
 
-        if (!userCompanies) throw new Error('No company found');
-        companyId = userCompanies.company_id;
+        if (!userCompanies) {
+          companyId = '00000000-0000-0000-0000-000000000001';
+
+          const { data: { session } } = await supabase.auth.getSession();
+          const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/setup-user-company`;
+          await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${session?.access_token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ companyId }),
+          });
+
+          await new Promise(resolve => setTimeout(resolve, 500));
+
+          const { data: refreshedCompanies } = await supabase
+            .from('user_companies')
+            .select('company_id')
+            .eq('user_id', userId)
+            .maybeSingle();
+
+          if (refreshedCompanies) {
+            companyId = refreshedCompanies.company_id;
+          }
+        } else {
+          companyId = userCompanies.company_id;
+        }
       }
 
       const fileExtension = file.name.split('.').pop()?.toLowerCase();
