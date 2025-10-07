@@ -246,16 +246,39 @@ export function KlantenUpload() {
     setImportResult(null);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      const demoUser = localStorage.getItem('demo-user');
+      let userId: string;
+      let companyId: string;
 
-      const { data: userCompanies } = await supabase
-        .from('user_companies')
-        .select('company_id')
-        .eq('user_id', user.id)
-        .single();
+      if (demoUser) {
+        const user = JSON.parse(demoUser);
+        userId = user.id;
 
-      if (!userCompanies) throw new Error('No company found');
+        const { data: userCompanies } = await supabase
+          .from('user_companies')
+          .select('company_id')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (!userCompanies) {
+          companyId = '00000000-0000-0000-0000-000000000001';
+        } else {
+          companyId = userCompanies.company_id;
+        }
+      } else {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+        userId = user.id;
+
+        const { data: userCompanies } = await supabase
+          .from('user_companies')
+          .select('company_id')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (!userCompanies) throw new Error('No company found');
+        companyId = userCompanies.company_id;
+      }
 
       const fileExtension = file.name.split('.').pop()?.toLowerCase();
       let allRows: Record<string, any>[] = [];
@@ -280,7 +303,7 @@ export function KlantenUpload() {
             allRows.push(row);
           }
 
-          await processImport(allRows, userCompanies.company_id);
+          await processImport(allRows, companyId);
         };
         reader.readAsArrayBuffer(file);
       } else {
@@ -299,7 +322,7 @@ export function KlantenUpload() {
             allRows.push(row);
           }
 
-          await processImport(allRows, userCompanies.company_id);
+          await processImport(allRows, companyId);
         };
         reader.readAsText(file);
       }
