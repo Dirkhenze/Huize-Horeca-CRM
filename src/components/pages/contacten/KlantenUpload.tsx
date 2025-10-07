@@ -379,18 +379,24 @@ export function KlantenUpload() {
 
       setImportProgress({ current: i, total: validRecords.length });
 
-      const { error, count } = await supabase
-        .from('customers')
-        .upsert(batch, {
-          onConflict: 'company_id,customer_number',
-          ignoreDuplicates: false,
-          count: 'exact'
-        });
+      try {
+        const { error, count } = await supabase
+          .from('customers')
+          .upsert(batch, {
+            onConflict: 'company_id,customer_number',
+            ignoreDuplicates: false,
+            count: 'exact'
+          });
 
-      if (error) {
-        errors.push(`Batch ${Math.floor(i / BATCH_SIZE) + 1}: ${error.message}`);
-      } else {
-        successCount += batch.length;
+        if (error) {
+          errors.push(`Batch ${Math.floor(i / BATCH_SIZE) + 1}: ${error.message}`);
+          console.error('Supabase error details:', error);
+        } else {
+          successCount += batch.length;
+        }
+      } catch (err: any) {
+        errors.push(`Batch ${Math.floor(i / BATCH_SIZE) + 1}: TypeError - ${err.message || 'Netwerkfout bij database verbinding'}`);
+        console.error('Network/fetch error:', err);
       }
     }
 
