@@ -1,43 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Upload } from 'lucide-react';
 import { SimpleCRUDPage } from '../PageTemplates';
 import { KlantenUpload } from './KlantenUpload';
-import { supabase } from '../../../lib/supabase';
 
 export function Klanten() {
   const [showUpload, setShowUpload] = useState(false);
-  const [linking, setLinking] = useState(false);
-
-  useEffect(() => {
-    linkUserToCompany();
-  }, []);
-
-  const linkUserToCompany = async () => {
-    setLinking(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/link-user-to-demo-company`;
-      await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      await supabase.auth.refreshSession();
-    } catch (error) {
-      console.error('Error linking user:', error);
-    } finally {
-      setLinking(false);
-    }
-  };
-
-  if (linking) {
-    return <div className="text-center py-8">Account instellen...</div>;
-  }
 
   if (showUpload) {
     return (

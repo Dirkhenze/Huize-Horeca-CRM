@@ -16,15 +16,6 @@ export function Auth() {
     setLoading(true);
 
     try {
-      if (email === 'dirk.henze@huizehoreca.nl' && password === 'Promdech?1980') {
-        localStorage.setItem('demo-user', JSON.stringify({
-          id: 'demo-user-id',
-          email: 'dirk.henze@huizehoreca.nl'
-        }));
-        window.location.reload();
-        return;
-      }
-
       if (isSignUp) {
         await signUp(email, password);
       } else {

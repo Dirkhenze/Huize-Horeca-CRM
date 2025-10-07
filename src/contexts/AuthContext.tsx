@@ -17,13 +17,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const demoUser = localStorage.getItem('demo-user');
-    if (demoUser) {
-      setUser(JSON.parse(demoUser) as User);
-      setLoading(false);
-      return;
-    }
-
     const ensureUserHasCompany = async (user: User, session: any) => {
       const companyId = user.app_metadata?.company_id;
       if (!companyId) {
@@ -110,7 +103,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    localStorage.removeItem('demo-user');
     setUser(null);
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
