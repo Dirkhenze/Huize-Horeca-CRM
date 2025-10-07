@@ -175,7 +175,7 @@ export function KlantenUpload() {
         'contact': 'contact',
         'emailvoorcontact': 'email_voor_contact',
         'www': 'www',
-        'mobieletele foon': 'mobiele_telefoon',
+        'mobieletelefoon': 'mobiele_telefoon',
         'emailvoorfactuur': 'email_voor_factuur',
         'emailverzenden': 'email_verzenden',
         'efactuur': 'e_factuur',
