@@ -60,14 +60,15 @@ export function ArtikelenUpload() {
       }));
 
       const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/product-upload`;
-      const { data: { session } } = await supabase.auth.getSession();
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+      };
 
       const response = await fetch(apiUrl, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           products,
           company_id: '00000000-0000-0000-0000-000000000001',
