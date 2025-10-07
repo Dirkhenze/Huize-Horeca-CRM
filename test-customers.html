@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Customers</title>
+</head>
+<body>
+  <h1>Customer Test</h1>
+  <div id="status">Loading...</div>
+  <div id="results"></div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+
+    const supabaseUrl = 'https://0ec90b57d6e95fcbda19832f.supabase.co';
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJib2x0IiwicmVmIjoiMGVjOTBiNTdkNmU5NWZjYmRhMTk4MzJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4ODE1NzQsImV4cCI6MTc1ODg4MTU3NH0.9I8-U0x86Ak8t2DGaIk0HfvTSLsAyzdnz-Nw00mMkKw';
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+    async function testFetch() {
+      const statusDiv = document.getElementById('status');
+      const resultsDiv = document.getElementById('results');
+
+      try {
+        statusDiv.textContent = 'Fetching customers...';
+
+        const { data, error } = await supabase
+          .from('customers')
+          .select('*')
+          .order('customer_number', { ascending: true });
+
+        if (error) {
+          statusDiv.textContent = 'Error: ' + error.message;
+          resultsDiv.innerHTML = '<pre>' + JSON.stringify(error, null, 2) + '</pre>';
+        } else {
+          statusDiv.textContent = `Success! Found ${data.length} customers`;
+          resultsDiv.innerHTML = '<pre>' + JSON.stringify(data.slice(0, 3), null, 2) + '</pre>';
+        }
+      } catch (e) {
+        statusDiv.textContent = 'Exception: ' + e.message;
+        resultsDiv.innerHTML = '<pre>' + e.stack + '</pre>';
+      }
+    }
+
+    testFetch();
+  </script>
+</body>
+</html>

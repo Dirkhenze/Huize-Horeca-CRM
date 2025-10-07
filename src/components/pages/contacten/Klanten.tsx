@@ -69,6 +69,7 @@ export function Klanten() {
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [formData, setFormData] = useState<Partial<Customer>>({});
   const [activeTab, setActiveTab] = useState<TabType>('basis');
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
   useEffect(() => {
     fetchCustomers();
@@ -76,19 +77,40 @@ export function Klanten() {
 
   const fetchCustomers = async () => {
     try {
-      const { data, error } = await supabase
-        .from('customers')
-        .select('*')
-        .order('customer_number', { ascending: true });
+      console.log('Fetching customers via edge function...');
+      setDebugInfo('Fetching customers via edge function...');
 
-      if (error) {
-        console.error('Error fetching customers:', error);
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-customers`;
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log('Response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        setDebugInfo(`Error: ${response.status} - ${errorText}`);
         setCustomers([]);
       } else {
-        setCustomers(data || []);
+        const result = await response.json();
+        console.log('Customers response:', { count: result.customers?.length });
+
+        if (result.customers) {
+          console.log(`Successfully loaded ${result.customers.length} customers`);
+          setDebugInfo(`Loaded ${result.customers.length} customers successfully`);
+          setCustomers(result.customers);
+        } else {
+          setDebugInfo('No customers in response');
+          setCustomers([]);
+        }
       }
-    } catch (error) {
-      console.error('Error fetching customers:', error);
+    } catch (error: any) {
+      console.error('Exception fetching customers:', error);
+      setDebugInfo(`Exception: ${error.message || error}`);
       setCustomers([]);
     } finally {
       setLoading(false);
@@ -182,6 +204,12 @@ export function Klanten() {
 
   return (
     <div>
+      {debugInfo && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+          <strong>Debug:</strong> {debugInfo} | Total customers: {customers.length}
+        </div>
+      )}
+
       <div className="flex justify-end mb-4">
         <button
           onClick={() => setShowUpload(true)}
