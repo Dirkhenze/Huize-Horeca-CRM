@@ -688,6 +688,3 @@ export function KlantenUpload() {
     </div>
   );
 }
-
-
-export { KlantenUpload }
