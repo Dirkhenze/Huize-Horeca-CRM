@@ -55,6 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     localStorage.removeItem('demo-user');
+    setUser(null);
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   };
