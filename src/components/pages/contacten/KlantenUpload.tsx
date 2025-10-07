@@ -356,13 +356,25 @@ export function KlantenUpload() {
           } else if (['saldo', 'achterstallig', 'achterstallig_in_valuta', 'kredietlimiet'].includes(mapping.dbColumn)) {
             customerData[mapping.dbColumn] = parseFloat(value) || 0;
           } else if (mapping.dbColumn === 'gemaakt') {
-            if (value) {
+            if (value && value.trim() !== '') {
               try {
-                const date = new Date(value);
-                if (!isNaN(date.getTime())) {
-                  customerData[mapping.dbColumn] = date.toISOString();
+                // Check if it's an Excel serial date number
+                if (!isNaN(Number(value))) {
+                  const excelEpoch = new Date(1899, 11, 30);
+                  const date = new Date(excelEpoch.getTime() + Number(value) * 86400000);
+                  if (!isNaN(date.getTime()) && date.getFullYear() > 1900 && date.getFullYear() < 2100) {
+                    customerData[mapping.dbColumn] = date.toISOString();
+                  } else {
+                    customerData[mapping.dbColumn] = null;
+                  }
                 } else {
-                  customerData[mapping.dbColumn] = null;
+                  // Try parsing as regular date string
+                  const date = new Date(value);
+                  if (!isNaN(date.getTime()) && date.getFullYear() > 1900 && date.getFullYear() < 2100) {
+                    customerData[mapping.dbColumn] = date.toISOString();
+                  } else {
+                    customerData[mapping.dbColumn] = null;
+                  }
                 }
               } catch {
                 customerData[mapping.dbColumn] = null;
