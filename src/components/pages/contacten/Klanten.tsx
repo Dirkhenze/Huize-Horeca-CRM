@@ -241,19 +241,6 @@ export function Klanten() {
     { key: 'city', label: 'Plaats', sortable: true },
     { key: 'phone', label: 'Telefoon' },
     { key: 'mobiele_telefoon', label: 'Mobiele telefoon' },
-    {
-      key: 'actions',
-      label: 'Acties',
-      render: (row: Customer) => (
-        <button
-          onClick={() => handleEdit(row)}
-          className="text-blue-600 hover:text-blue-700 p-1"
-          title="Bewerken"
-        >
-          <Edit2 className="w-4 h-4" />
-        </button>
-      )
-    }
   ];
 
   const tabs = [
@@ -283,7 +270,7 @@ export function Klanten() {
         </button>
       </div>
 
-      <DataTable columns={columns} data={customers} searchPlaceholder="Zoek klanten..." />
+      <DataTable columns={columns} data={customers} searchPlaceholder="Zoek klanten..." onEdit={handleEdit} />
 
       {editingCustomer && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
