@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const newCompanyId = crypto.randomUUID();
           const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/setup-user-company`;
-          await fetch(apiUrl, {
+          const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${session?.access_token}`,
@@ -38,6 +38,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             },
             body: JSON.stringify({ companyId: newCompanyId }),
           });
+
+          if (response.ok) {
+            await supabase.auth.refreshSession();
+            const { data: { session: newSession } } = await supabase.auth.getSession();
+            if (newSession?.user) {
+              setUser(newSession.user);
+            }
+          }
         } catch (err) {
           console.error('Error ensuring user has company:', err);
         }
