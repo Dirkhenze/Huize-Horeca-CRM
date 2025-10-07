@@ -356,7 +356,20 @@ export function KlantenUpload() {
           } else if (['saldo', 'achterstallig', 'achterstallig_in_valuta', 'kredietlimiet'].includes(mapping.dbColumn)) {
             customerData[mapping.dbColumn] = parseFloat(value) || 0;
           } else if (mapping.dbColumn === 'gemaakt') {
-            customerData[mapping.dbColumn] = value ? new Date(value).toISOString() : null;
+            if (value) {
+              try {
+                const date = new Date(value);
+                if (!isNaN(date.getTime())) {
+                  customerData[mapping.dbColumn] = date.toISOString();
+                } else {
+                  customerData[mapping.dbColumn] = null;
+                }
+              } catch {
+                customerData[mapping.dbColumn] = null;
+              }
+            } else {
+              customerData[mapping.dbColumn] = null;
+            }
           } else {
             customerData[mapping.dbColumn] = value;
           }
