@@ -168,7 +168,7 @@ export function KlantenUpload() {
         'adres1': 'adres_1',
         'adres2': 'adres_2',
         'adres3': 'adres_3',
-        'postcode': 'postcode',
+        'postcode': 'postal_code',
         'plaats': 'city',
         'land': 'country',
         'telefoon': 'phone',
@@ -688,3 +688,6 @@ export function KlantenUpload() {
     </div>
   );
 }
+
+
+export { KlantenUpload }
