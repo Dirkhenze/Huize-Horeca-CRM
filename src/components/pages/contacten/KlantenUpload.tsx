@@ -20,6 +20,7 @@ export function KlantenUpload() {
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
   const [columnMapping, setColumnMapping] = useState<ColumnMapping[]>([]);
   const [importing, setImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState<{ current: number; total: number } | null>(null);
   const [importResult, setImportResult] = useState<{ success: number; errors: string[] } | null>(null);
 
   const dbColumns = [
@@ -244,6 +245,7 @@ export function KlantenUpload() {
 
     setImporting(true);
     setImportResult(null);
+    setImportProgress(null);
 
     try {
       const demoUser = localStorage.getItem('demo-user');
@@ -335,7 +337,7 @@ export function KlantenUpload() {
 
   const processImport = async (rows: Record<string, any>[], companyId: string) => {
     const errors: string[] = [];
-    let successCount = 0;
+    const validRecords: Record<string, any>[] = [];
 
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
@@ -365,20 +367,33 @@ export function KlantenUpload() {
         continue;
       }
 
-      const { error } = await supabase
+      validRecords.push(customerData);
+    }
+
+    const BATCH_SIZE = 100;
+    let successCount = 0;
+
+    for (let i = 0; i < validRecords.length; i += BATCH_SIZE) {
+      const batch = validRecords.slice(i, i + BATCH_SIZE);
+
+      setImportProgress({ current: i, total: validRecords.length });
+
+      const { error, count } = await supabase
         .from('customers')
-        .upsert(customerData, {
+        .upsert(batch, {
           onConflict: 'company_id,customer_number',
           ignoreDuplicates: false,
+          count: 'exact'
         });
 
       if (error) {
-        errors.push(`Rij ${i + 2}: ${error.message}`);
+        errors.push(`Batch ${Math.floor(i / BATCH_SIZE) + 1}: ${error.message}`);
       } else {
-        successCount++;
+        successCount += batch.length;
       }
     }
 
+    setImportProgress(null);
     setImportResult({ success: successCount, errors });
   };
 
@@ -564,6 +579,25 @@ export function KlantenUpload() {
                 </div>
               </div>
 
+              {importProgress && (
+                <div className="border-t border-slate-200 pt-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-700">Importeren...</span>
+                      <span className="font-medium text-slate-900">
+                        {importProgress.current} / {importProgress.total}
+                      </span>
+                    </div>
+                    <div className="w-full bg-slate-200 rounded-full h-2">
+                      <div
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${(importProgress.current / importProgress.total) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center justify-end gap-3 pt-4">
                 <button
                   onClick={() => {
@@ -572,7 +606,8 @@ export function KlantenUpload() {
                     setColumnMapping([]);
                     setImportResult(null);
                   }}
-                  className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
+                  disabled={importing}
+                  className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50"
                 >
                   Annuleer
                 </button>
