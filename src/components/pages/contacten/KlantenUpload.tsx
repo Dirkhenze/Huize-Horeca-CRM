@@ -393,23 +393,38 @@ export function KlantenUpload() {
       setImportProgress({ current: i, total: validRecords.length });
 
       try {
-        const { error, count } = await supabase
-          .from('customers')
-          .upsert(batch, {
-            onConflict: 'company_id,customer_number',
-            ignoreDuplicates: false,
-            count: 'exact'
-          });
+        for (const record of batch) {
+          const { data: existing } = await supabase
+            .from('customers')
+            .select('id')
+            .eq('company_id', record.company_id)
+            .eq('customer_number', record.customer_number)
+            .maybeSingle();
 
-        if (error) {
-          errors.push(`Batch ${Math.floor(i / BATCH_SIZE) + 1}: ${error.message}`);
-          console.error('Supabase error details:', error);
-        } else {
-          successCount += batch.length;
+          let error;
+          if (existing) {
+            const result = await supabase
+              .from('customers')
+              .update(record)
+              .eq('id', existing.id);
+            error = result.error;
+          } else {
+            const result = await supabase
+              .from('customers')
+              .insert(record);
+            error = result.error;
+          }
+
+          if (error) {
+            errors.push(`Klant ${record.customer_number}: ${error.message}`);
+            console.error('Supabase error:', error);
+          } else {
+            successCount++;
+          }
         }
       } catch (err: any) {
-        errors.push(`Batch ${Math.floor(i / BATCH_SIZE) + 1}: TypeError - ${err.message || 'Netwerkfout bij database verbinding'}`);
-        console.error('Network/fetch error:', err);
+        errors.push(`Batch ${Math.floor(i / BATCH_SIZE) + 1}: ${err.message || 'Netwerkfout'}`);
+        console.error('Import error:', err);
       }
     }
 
