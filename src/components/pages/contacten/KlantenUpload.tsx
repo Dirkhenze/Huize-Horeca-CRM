@@ -396,7 +396,7 @@ export function KlantenUpload() {
       validRecords.push(customerData);
     }
 
-    const BATCH_SIZE = 100;
+    const BATCH_SIZE = 50;
     let successCount = 0;
 
     for (let i = 0; i < validRecords.length; i += BATCH_SIZE) {
@@ -405,33 +405,30 @@ export function KlantenUpload() {
       setImportProgress({ current: i, total: validRecords.length });
 
       try {
-        for (const record of batch) {
-          const { data: existing } = await supabase
-            .from('customers')
-            .select('id')
-            .eq('company_id', record.company_id)
-            .eq('customer_number', record.customer_number)
-            .maybeSingle();
+        const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/customer-upload`;
+        const headers = {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+        };
 
-          let error;
-          if (existing) {
-            const result = await supabase
-              .from('customers')
-              .update(record)
-              .eq('id', existing.id);
-            error = result.error;
-          } else {
-            const result = await supabase
-              .from('customers')
-              .insert(record);
-            error = result.error;
-          }
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ customers: batch }),
+        });
 
-          if (error) {
-            errors.push(`Klant ${record.customer_number}: ${error.message}`);
-            console.error('Supabase error:', error);
-          } else {
-            successCount++;
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+
+        if (result.error) {
+          errors.push(`Batch ${Math.floor(i / BATCH_SIZE) + 1}: ${result.error}`);
+        } else {
+          successCount += result.success;
+          if (result.errors && result.errors.length > 0) {
+            errors.push(...result.errors);
           }
         }
       } catch (err: any) {
