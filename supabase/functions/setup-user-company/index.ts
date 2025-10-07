@@ -68,6 +68,31 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    const { data: existingCompany } = await supabaseAdmin
+      .from("companies")
+      .select("id")
+      .eq("id", companyId)
+      .maybeSingle();
+
+    if (!existingCompany) {
+      const { error: companyError } = await supabaseAdmin
+        .from("companies")
+        .insert({
+          id: companyId,
+          name: user.email?.split('@')[0] || "Mijn Bedrijf",
+        });
+
+      if (companyError) {
+        return new Response(
+          JSON.stringify({ error: `Failed to create company: ${companyError.message}` }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+    }
+
     const { data: existingLink } = await supabaseAdmin
       .from("user_companies")
       .select("*")
@@ -117,7 +142,7 @@ Deno.serve(async (req: Request) => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Company ID added to JWT claims",
+        message: "Company created and linked to user",
         user_id: user.id,
         company_id: companyId,
       }),

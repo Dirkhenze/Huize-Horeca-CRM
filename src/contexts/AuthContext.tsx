@@ -24,9 +24,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    const ensureUserHasCompany = async (user: User, session: any) => {
+      const companyId = user.app_metadata?.company_id;
+      if (!companyId) {
+        try {
+          const newCompanyId = crypto.randomUUID();
+          const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/setup-user-company`;
+          await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${session?.access_token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ companyId: newCompanyId }),
+          });
+        } catch (err) {
+          console.error('Error ensuring user has company:', err);
+        }
+      }
+    };
+
     supabase.auth.getSession()
       .then(({ data: { session } }) => {
         setUser(session?.user ?? null);
+        if (session?.user) {
+          ensureUserHasCompany(session.user, session);
+        }
         setLoading(false);
       })
       .catch((error) => {
@@ -37,6 +60,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       (async () => {
         setUser(session?.user ?? null);
+        if (session?.user) {
+          await ensureUserHasCompany(session.user, session);
+        }
       })();
     });
 
@@ -49,8 +75,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) throw error;
+
+    if (data.user) {
+      try {
+        const companyId = crypto.randomUUID();
+
+        const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/setup-user-company`;
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${data.session?.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ companyId }),
+        });
+
+        if (!response.ok) {
+          console.error('Failed to setup user company');
+        }
+      } catch (err) {
+        console.error('Error setting up user company:', err);
+      }
+    }
   };
 
   const signOut = async () => {
