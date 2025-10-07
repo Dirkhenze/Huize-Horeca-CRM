@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Upload, Download, AlertCircle, CheckCircle } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
+import * as XLSX from 'xlsx';
 
 interface ColumnMapping {
   excelColumn: string;
@@ -88,12 +89,47 @@ export function KlantenUpload() {
     setFile(selectedFile);
     setImportResult(null);
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target?.result as string;
-      parseCSV(text);
-    };
-    reader.readAsText(selectedFile);
+    const fileExtension = selectedFile.name.split('.').pop()?.toLowerCase();
+
+    if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const data = event.target?.result;
+        parseExcel(data as ArrayBuffer);
+      };
+      reader.readAsArrayBuffer(selectedFile);
+    } else {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const text = event.target?.result as string;
+        parseCSV(text);
+      };
+      reader.readAsText(selectedFile);
+    }
+  };
+
+  const parseExcel = (data: ArrayBuffer) => {
+    const workbook = XLSX.read(data, { type: 'array' });
+    const firstSheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[firstSheetName];
+
+    const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+    if (jsonData.length === 0) return;
+
+    const headers = jsonData[0].map((h: any) => String(h || '').trim());
+    const rows: Record<string, any>[] = [];
+
+    for (let i = 1; i < Math.min(jsonData.length, 6); i++) {
+      const row: Record<string, any> = {};
+      headers.forEach((header: string, index: number) => {
+        row[header] = jsonData[i][index] !== undefined ? String(jsonData[i][index]) : '';
+      });
+      rows.push(row);
+    }
+
+    setPreviewData({ headers, rows });
+    autoMapColumns(headers);
   };
 
   const parseCSV = (text: string) => {
@@ -113,7 +149,10 @@ export function KlantenUpload() {
     }
 
     setPreviewData({ headers, rows });
+    autoMapColumns(headers);
+  };
 
+  const autoMapColumns = (headers: string[]) => {
     const autoMapping: ColumnMapping[] = headers.map(header => {
       const normalized = header.toLowerCase().replace(/[_\s-]/g, '');
       let dbColumn = '';
@@ -218,67 +257,52 @@ export function KlantenUpload() {
 
       if (!userCompanies) throw new Error('No company found');
 
-      const reader = new FileReader();
-      reader.onload = async (event) => {
-        const text = event.target?.result as string;
-        const lines = text.split('\n').filter(line => line.trim());
-        const headers = lines[0].split(/[,;\t]/).map(h => h.trim().replace(/^"|"$/g, ''));
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      let allRows: Record<string, any>[] = [];
+      let headers: string[] = [];
 
-        const errors: string[] = [];
-        let successCount = 0;
+      if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          const data = event.target?.result;
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
 
-        for (let i = 1; i < lines.length; i++) {
-          const values = lines[i].split(/[,;\t]/).map(v => v.trim().replace(/^"|"$/g, ''));
-          const row: Record<string, any> = {};
+          const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+          headers = jsonData[0].map((h: any) => String(h || '').trim());
 
-          headers.forEach((header, index) => {
-            row[header] = values[index] || '';
-          });
-
-          const customerData: Record<string, any> = {
-            company_id: userCompanies.company_id,
-            uniconta_synced_at: new Date().toISOString(),
-          };
-
-          columnMapping.forEach(mapping => {
-            if (mapping.dbColumn && row[mapping.excelColumn]) {
-              const value = row[mapping.excelColumn];
-
-              if (mapping.dbColumn === 'geblokkeerd' || mapping.dbColumn === 'automatische_orderbevestiging') {
-                customerData[mapping.dbColumn] = value === 'true' || value === '1' || value === 'ja';
-              } else if (['saldo', 'achterstallig', 'achterstallig_in_valuta', 'kredietlimiet'].includes(mapping.dbColumn)) {
-                customerData[mapping.dbColumn] = parseFloat(value) || 0;
-              } else if (mapping.dbColumn === 'gemaakt') {
-                customerData[mapping.dbColumn] = value ? new Date(value).toISOString() : null;
-              } else {
-                customerData[mapping.dbColumn] = value;
-              }
-            }
-          });
-
-          if (!customerData.customer_number || !customerData.name) {
-            errors.push(`Rij ${i}: Klantnummer en Naam zijn verplicht`);
-            continue;
-          }
-
-          const { error } = await supabase
-            .from('customers')
-            .upsert(customerData, {
-              onConflict: 'company_id,customer_number',
-              ignoreDuplicates: false,
+          for (let i = 1; i < jsonData.length; i++) {
+            const row: Record<string, any> = {};
+            headers.forEach((header: string, index: number) => {
+              row[header] = jsonData[i][index] !== undefined ? String(jsonData[i][index]) : '';
             });
-
-          if (error) {
-            errors.push(`Rij ${i}: ${error.message}`);
-          } else {
-            successCount++;
+            allRows.push(row);
           }
-        }
 
-        setImportResult({ success: successCount, errors });
-      };
+          await processImport(allRows, userCompanies.company_id);
+        };
+        reader.readAsArrayBuffer(file);
+      } else {
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          const text = event.target?.result as string;
+          const lines = text.split('\n').filter(line => line.trim());
+          headers = lines[0].split(/[,;\t]/).map(h => h.trim().replace(/^"|"$/g, ''));
 
-      reader.readAsText(file);
+          for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(/[,;\t]/).map(v => v.trim().replace(/^"|"$/g, ''));
+            const row: Record<string, any> = {};
+            headers.forEach((header, index) => {
+              row[header] = values[index] || '';
+            });
+            allRows.push(row);
+          }
+
+          await processImport(allRows, userCompanies.company_id);
+        };
+        reader.readAsText(file);
+      }
     } catch (error: any) {
       setImportResult({ success: 0, errors: [error.message] });
     } finally {
@@ -286,7 +310,56 @@ export function KlantenUpload() {
     }
   };
 
-  const downloadTemplate = () => {
+  const processImport = async (rows: Record<string, any>[], companyId: string) => {
+    const errors: string[] = [];
+    let successCount = 0;
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const customerData: Record<string, any> = {
+        company_id: companyId,
+        uniconta_synced_at: new Date().toISOString(),
+      };
+
+      columnMapping.forEach(mapping => {
+        if (mapping.dbColumn && row[mapping.excelColumn]) {
+          const value = row[mapping.excelColumn];
+
+          if (mapping.dbColumn === 'geblokkeerd' || mapping.dbColumn === 'automatische_orderbevestiging') {
+            customerData[mapping.dbColumn] = value === 'true' || value === '1' || value === 'ja';
+          } else if (['saldo', 'achterstallig', 'achterstallig_in_valuta', 'kredietlimiet'].includes(mapping.dbColumn)) {
+            customerData[mapping.dbColumn] = parseFloat(value) || 0;
+          } else if (mapping.dbColumn === 'gemaakt') {
+            customerData[mapping.dbColumn] = value ? new Date(value).toISOString() : null;
+          } else {
+            customerData[mapping.dbColumn] = value;
+          }
+        }
+      });
+
+      if (!customerData.customer_number || !customerData.name) {
+        errors.push(`Rij ${i + 2}: Klantnummer en Naam zijn verplicht`);
+        continue;
+      }
+
+      const { error } = await supabase
+        .from('customers')
+        .upsert(customerData, {
+          onConflict: 'company_id,customer_number',
+          ignoreDuplicates: false,
+        });
+
+      if (error) {
+        errors.push(`Rij ${i + 2}: ${error.message}`);
+      } else {
+        successCount++;
+      }
+    }
+
+    setImportResult({ success: successCount, errors });
+  };
+
+  const downloadTemplate = (format: 'csv' | 'xlsx' = 'xlsx') => {
     const headers = [
       'Klantnummer', 'Naam', 'Saldo', 'Achterstallig', 'Achterstallig in valuta', 'Kredietlimiet',
       'Adres 1', 'Adres 2', 'Adres 3', 'Postcode', 'Plaats', 'Land', 'Telefoon', 'Contact',
@@ -311,12 +384,19 @@ export function KlantenUpload() {
       'true', 'Hoofdstraat 1, 1000AA Amsterdam', '', '09:00-17:00', 'Week 1', 'John Doe', ''
     ];
 
-    const csv = [headers.join(','), exampleRow.join(',')].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'klanten_uniconta_template.csv';
-    link.click();
+    if (format === 'xlsx') {
+      const worksheet = XLSX.utils.aoa_to_sheet([headers, exampleRow]);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Klanten');
+      XLSX.writeFile(workbook, 'klanten_uniconta_template.xlsx');
+    } else {
+      const csv = [headers.join(','), exampleRow.join(',')].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'klanten_uniconta_template.csv';
+      link.click();
+    }
   };
 
   const groupedColumns = dbColumns.reduce((acc, col) => {
@@ -335,13 +415,22 @@ export function KlantenUpload() {
             Upload een CSV of Excel bestand met klantgegevens uit Uniconta
           </p>
         </div>
-        <button
-          onClick={downloadTemplate}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
-        >
-          <Download className="w-4 h-4" />
-          Download Template
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => downloadTemplate('xlsx')}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
+          >
+            <Download className="w-4 h-4" />
+            Download Excel
+          </button>
+          <button
+            onClick={() => downloadTemplate('csv')}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50"
+          >
+            <Download className="w-4 h-4" />
+            CSV
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg border border-slate-200 p-6">
@@ -523,7 +612,8 @@ export function KlantenUpload() {
           Tips voor een succesvolle import
         </h3>
         <ul className="text-sm text-blue-800 space-y-1">
-          <li>• Export data vanuit Uniconta als CSV bestand</li>
+          <li>• Upload Excel (.xlsx) of CSV bestanden</li>
+          <li>• Export data vanuit Uniconta en upload direct</li>
           <li>• Klantnummer en Naam zijn verplichte velden</li>
           <li>• Bestaande klanten (zelfde klantnummer) worden automatisch bijgewerkt</li>
           <li>• Alle 50+ Uniconta velden worden ondersteund</li>
