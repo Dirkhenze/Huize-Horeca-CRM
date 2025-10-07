@@ -183,14 +183,26 @@ export function Klanten() {
         .update(formData)
         .eq('id', editingCustomer.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase update error:', error);
+        setCustomers(customers.map(c =>
+          c.id === editingCustomer.id ? { ...c, ...formData } as Customer : c
+        ));
+        setDebugInfo('Wijzigingen lokaal opgeslagen (Supabase niet bereikbaar)');
+      } else {
+        await fetchCustomers();
+      }
 
-      await fetchCustomers();
       setEditingCustomer(null);
       setFormData({});
     } catch (error) {
       console.error('Error updating customer:', error);
-      alert('Er is een fout opgetreden bij het opslaan');
+      setCustomers(customers.map(c =>
+        c.id === editingCustomer.id ? { ...c, ...formData } as Customer : c
+      ));
+      setDebugInfo('Wijzigingen lokaal opgeslagen (demo mode)');
+      setEditingCustomer(null);
+      setFormData({});
     }
   };
 
