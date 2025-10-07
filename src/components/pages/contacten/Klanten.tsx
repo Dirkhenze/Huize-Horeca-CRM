@@ -77,36 +77,24 @@ export function Klanten() {
 
   const fetchCustomers = async () => {
     try {
-      console.log('Fetching customers via edge function...');
-      setDebugInfo('Fetching customers via edge function...');
+      console.log('Fetching customers...');
+      setDebugInfo('Fetching customers from Supabase...');
 
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-customers`;
-      const response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const { data, error } = await supabase
+        .from('customers')
+        .select('*')
+        .order('customer_number', { ascending: true });
 
-      console.log('Response status:', response.status);
+      console.log('Customers response:', { data, error, count: data?.length });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error response:', errorText);
-        setDebugInfo(`Error: ${response.status} - ${errorText}`);
+      if (error) {
+        console.error('Error fetching customers:', error);
+        setDebugInfo(`Error: ${error.message}`);
         setCustomers([]);
       } else {
-        const result = await response.json();
-        console.log('Customers response:', { count: result.customers?.length });
-
-        if (result.customers) {
-          console.log(`Successfully loaded ${result.customers.length} customers`);
-          setDebugInfo(`Loaded ${result.customers.length} customers successfully`);
-          setCustomers(result.customers);
-        } else {
-          setDebugInfo('No customers in response');
-          setCustomers([]);
-        }
+        console.log(`Successfully loaded ${data?.length || 0} customers`);
+        setDebugInfo(`Loaded ${data?.length || 0} customers successfully`);
+        setCustomers(data || []);
       }
     } catch (error: any) {
       console.error('Exception fetching customers:', error);
