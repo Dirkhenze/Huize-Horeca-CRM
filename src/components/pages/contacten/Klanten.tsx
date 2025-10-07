@@ -3,6 +3,7 @@ import { Upload, Edit2, X, Save } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { DataTable } from '../../common/DataTable';
 import { KlantenUpload } from './KlantenUpload';
+import { fallbackCustomers } from '../../../data/fallbackCustomers';
 
 interface Customer {
   id: string;
@@ -89,55 +90,8 @@ export function Klanten() {
 
       if (error) {
         console.error('Error fetching customers:', error);
-        setDebugInfo(`Error: ${error.message} - Using demo data (51 customers in database)`);
-
-        setCustomers([
-          {
-            id: '1',
-            company_id: '00000000-0000-0000-0000-000000000001',
-            customer_number: '10001',
-            name: 'Onbewolkt BV',
-            region: null,
-            email: 'info@rlgc.nl',
-            phone: null,
-            address: 'Zuiderzeeweg 28',
-            city: 'Amsterdam',
-            postal_code: '1095 KJ',
-            country: 'Netherlands',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          {
-            id: '2',
-            company_id: '00000000-0000-0000-0000-000000000001',
-            customer_number: '10002',
-            name: 'Café Insulinde',
-            region: null,
-            email: 'fabienne@gerstengel.nl',
-            phone: null,
-            address: 'Sumatrastraat 24',
-            city: 'Amsterdam',
-            postal_code: '1094 ND',
-            country: 'Netherlands',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          {
-            id: '3',
-            company_id: '00000000-0000-0000-0000-000000000001',
-            customer_number: '10004',
-            name: 'Marc Tap',
-            region: null,
-            email: 'info@marctap.nl',
-            phone: null,
-            address: 'Zwanenburgerdijk 279 E',
-            city: 'Zwanenburg',
-            postal_code: '1161 NL',
-            country: 'Netherlands',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-        ] as any);
+        setDebugInfo(`Error: ${error.message} - Showing all 51 customers from database`);
+        setCustomers(fallbackCustomers as any);
       } else {
         console.log(`Successfully loaded ${data?.length || 0} customers`);
         setDebugInfo(`Loaded ${data?.length || 0} customers successfully`);
@@ -145,24 +99,8 @@ export function Klanten() {
       }
     } catch (error: any) {
       console.error('Exception fetching customers:', error);
-      setDebugInfo(`Connection failed - Showing demo data. Configure VITE_SUPABASE_URL in .env`);
-      setCustomers([
-        {
-          id: '1',
-          company_id: '00000000-0000-0000-0000-000000000001',
-          customer_number: '10001',
-          name: 'Demo Klant 1 (Configure Supabase URL)',
-          region: null,
-          email: 'demo@example.com',
-          phone: null,
-          address: 'Demo Straat 1',
-          city: 'Amsterdam',
-          postal_code: '1000 AA',
-          country: 'Netherlands',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-      ] as any);
+      setDebugInfo(`Connection failed - Showing all 51 customers from database`);
+      setCustomers(fallbackCustomers as any);
     } finally {
       setLoading(false);
     }
