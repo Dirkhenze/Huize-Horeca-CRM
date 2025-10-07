@@ -78,33 +78,3 @@ BEGIN
   RETURN NEW;
 END;
 $$ language 'plpgsql';
-
-CREATE TRIGGER update_team_members_updated_at
-  BEFORE UPDATE ON team_members
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
-
--- Seed Sales team members for demo company
-INSERT INTO team_members (company_id, first_name, last_name, email, phone, role, employee_number, department)
-VALUES
-  ('00000000-0000-0000-0000-000000000001', 'Bobby', 'Klein', 'bobby.klein@huizehoreca.nl', '0612345601', 'sales', 'HH001', 'Verkoop'),
-  ('00000000-0000-0000-0000-000000000001', 'Dirk', 'Henze', 'dirk.henze@huizehoreca.nl', '0612345602', 'sales', 'HH002', 'Verkoop'),
-  ('00000000-0000-0000-0000-000000000001', 'Emile', 'Metekohy', 'emile.metekohy@huizehoreca.nl', '0612345603', 'sales', 'HH003', 'Verkoop'),
-  ('00000000-0000-0000-0000-000000000001', 'Maarten', 'Baas', 'maarten.baas@huizehoreca.nl', '0612345604', 'sales', 'HH004', 'Verkoop'),
-  ('00000000-0000-0000-0000-000000000001', 'Patrick', 'Wiersema', 'patrick.wiersema@huizehoreca.nl', '0612345605', 'sales', 'HH005', 'Verkoop'),
-  ('00000000-0000-0000-0000-000000000001', 'Paul', 'van Bennekom', 'paul.bennekom@huizehoreca.nl', '0612345606', 'sales', 'HH006', 'Verkoop'),
-  ('00000000-0000-0000-0000-000000000001', 'Ron', 'van den Wurf', 'ron.wurf@huizehoreca.nl', '0612345607', 'sales', 'HH007', 'Verkoop'),
-  ('00000000-0000-0000-0000-000000000001', 'Man', 'van Drank', 'man.drank@huizehoreca.nl', '0612345608', 'sales', 'HH008', 'Verkoop'),
-  ('00000000-0000-0000-0000-000000000001', 'Jan', 'Binnendienst', 'jan.binnen@huizehoreca.nl', '0612345609', 'sales', 'HH009', 'Binnendienst')
-ON CONFLICT (company_id, employee_number) DO NOTHING;
-
--- Add some other department members
-INSERT INTO team_members (company_id, first_name, last_name, email, phone, role, employee_number, department)
-VALUES
-  ('00000000-0000-0000-0000-000000000001', 'Lisa', 'van der Berg', 'lisa.berg@huizehoreca.nl', '0612345610', 'inkoop', 'HH010', 'Inkoop'),
-  ('00000000-0000-0000-0000-000000000001', 'Mark', 'de Vries', 'mark.vries@huizehoreca.nl', '0612345611', 'inkoop', 'HH011', 'Inkoop'),
-  ('00000000-0000-0000-0000-000000000001', 'Jan', 'Jansen', 'jan.jansen@huizehoreca.nl', '0612345612', 'logistiek', 'HH012', 'Logistiek'),
-  ('00000000-0000-0000-0000-000000000001', 'Piet', 'Pietersen', 'piet.pietersen@huizehoreca.nl', '0612345613', 'logistiek', 'HH013', 'Logistiek'),
-  ('00000000-0000-0000-0000-000000000001', 'Sara', 'Bakker', 'sara.bakker@huizehoreca.nl', '0612345614', 'magazijn', 'HH014', 'Magazijn'),
-  ('00000000-0000-0000-0000-000000000001', 'Tom', 'Smit', 'tom.smit@huizehoreca.nl', '0612345615', 'magazijn', 'HH015', 'Magazijn')
-ON CONFLICT (company_id, employee_number) DO NOTHING;

@@ -146,6 +146,41 @@ FROM products p
 WHERE p.company_id = '00000000-0000-0000-0000-000000000001'
 ON CONFLICT (product_id, warehouse_location) DO NOTHING;
 
+-- Insert sales team (accountmanagers)
+INSERT INTO team_members (company_id, first_name, last_name, email, phone, role, employee_number, department, is_active)
+VALUES
+  ('00000000-0000-0000-0000-000000000001', 'Bobby', 'Klein', 'bobby.klein@huizehoreca.nl', '0612345601', 'sales', 'HH001', 'Verkoop', true),
+  ('00000000-0000-0000-0000-000000000001', 'Dirk', 'Henze', 'dirk.henze@huizehoreca.nl', '0612345602', 'sales', 'HH002', 'Verkoop', true),
+  ('00000000-0000-0000-0000-000000000001', 'Emile', 'Metekohy', 'emile.metekohy@huizehoreca.nl', '0612345603', 'sales', 'HH003', 'Verkoop', true),
+  ('00000000-0000-0000-0000-000000000001', 'Maarten', 'Baas', 'maarten.baas@huizehoreca.nl', '0612345604', 'sales', 'HH004', 'Verkoop', true),
+  ('00000000-0000-0000-0000-000000000001', 'Patrick', 'Wiersema', 'patrick.wiersema@huizehoreca.nl', '0612345605', 'sales', 'HH005', 'Verkoop', true),
+  ('00000000-0000-0000-0000-000000000001', 'Paul', 'van Bennekom', 'paul.bennekom@huizehoreca.nl', '0612345606', 'sales', 'HH006', 'Verkoop', true),
+  ('00000000-0000-0000-0000-000000000001', 'Ron', 'van den Wurf', 'ron.wurf@huizehoreca.nl', '0612345607', 'sales', 'HH007', 'Verkoop', true),
+  ('00000000-0000-0000-0000-000000000001', 'Man', 'van Drank', 'man.drank@huizehoreca.nl', '0612345608', 'sales', 'HH008', 'Slijterij', true),
+  ('00000000-0000-0000-0000-000000000001', 'Jan', 'Binnendienst', 'jan.binnen@huizehoreca.nl', '0612345609', 'sales', 'HH009', 'Binnendienst', true)
+ON CONFLICT (company_id, employee_number) DO NOTHING;
+
+-- Insert inkoop team
+INSERT INTO team_members (company_id, first_name, last_name, email, phone, role, employee_number, department, is_active)
+VALUES
+  ('00000000-0000-0000-0000-000000000001', 'Lisa', 'van der Berg', 'lisa.berg@huizehoreca.nl', '0612345610', 'inkoop', 'HH010', 'Inkoop', true),
+  ('00000000-0000-0000-0000-000000000001', 'Mark', 'de Vries', 'mark.vries@huizehoreca.nl', '0612345611', 'inkoop', 'HH011', 'Inkoop', true)
+ON CONFLICT (company_id, employee_number) DO NOTHING;
+
+-- Insert logistiek team
+INSERT INTO team_members (company_id, first_name, last_name, email, phone, role, employee_number, department, is_active)
+VALUES
+  ('00000000-0000-0000-0000-000000000001', 'Kees', 'Janssen', 'kees.janssen@huizehoreca.nl', '0612345612', 'logistiek', 'HH012', 'Logistiek', true),
+  ('00000000-0000-0000-0000-000000000001', 'Frank', 'Peters', 'frank.peters@huizehoreca.nl', '0612345613', 'logistiek', 'HH013', 'Logistiek', true)
+ON CONFLICT (company_id, employee_number) DO NOTHING;
+
+-- Insert magazijn team
+INSERT INTO team_members (company_id, first_name, last_name, email, phone, role, employee_number, department, is_active)
+VALUES
+  ('00000000-0000-0000-0000-000000000001', 'Sara', 'Bakker', 'sara.bakker@huizehoreca.nl', '0612345614', 'magazijn', 'HH014', 'Magazijn', true),
+  ('00000000-0000-0000-0000-000000000001', 'Tom', 'Smit', 'tom.smit@huizehoreca.nl', '0612345615', 'magazijn', 'HH015', 'Magazijn', true)
+ON CONFLICT (company_id, employee_number) DO NOTHING;
+
 -- Insert demo drivers
 INSERT INTO drivers (company_id, first_name, last_name, email, phone, license_number, active)
 VALUES
