@@ -17,6 +17,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const demoSession = localStorage.getItem('supabase.auth.token');
+    if (demoSession) {
+      try {
+        const parsed = JSON.parse(demoSession);
+        if (parsed.user) {
+          setUser(parsed.user as User);
+          setLoading(false);
+          return;
+        }
+      } catch (e) {
+        localStorage.removeItem('supabase.auth.token');
+      }
+    }
+
     const ensureUserHasCompany = async (user: User, session: any) => {
       const companyId = user.app_metadata?.company_id;
       if (!companyId) {
@@ -103,6 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    localStorage.removeItem('supabase.auth.token');
     setUser(null);
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
