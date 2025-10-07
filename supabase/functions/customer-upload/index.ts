@@ -32,6 +32,34 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    const firstCustomer = customers[0];
+    const companyId = firstCustomer.company_id;
+
+    const { data: existingCompany } = await supabase
+      .from("companies")
+      .select("id")
+      .eq("id", companyId)
+      .maybeSingle();
+
+    if (!existingCompany) {
+      const { error: companyError } = await supabase
+        .from("companies")
+        .insert({
+          id: companyId,
+          name: "Demo Bedrijf",
+        });
+
+      if (companyError) {
+        return new Response(
+          JSON.stringify({ error: `Company creation failed: ${companyError.message}` }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+    }
+
     const results = {
       success: 0,
       errors: [] as string[],
