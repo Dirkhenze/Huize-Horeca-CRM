@@ -81,10 +81,15 @@ export function Klanten() {
         .select('*')
         .order('customer_number', { ascending: true });
 
-      if (error) throw error;
-      setCustomers(data || []);
+      if (error) {
+        console.error('Error fetching customers:', error);
+        setCustomers([]);
+      } else {
+        setCustomers(data || []);
+      }
     } catch (error) {
       console.error('Error fetching customers:', error);
+      setCustomers([]);
     } finally {
       setLoading(false);
     }
