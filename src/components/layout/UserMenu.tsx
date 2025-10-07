@@ -1,4 +1,5 @@
 import { X, Users, Building2, Settings, LogOut } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface UserMenuProps {
   isOpen: boolean;
@@ -14,6 +15,8 @@ const menuItems = [
 ];
 
 export function UserMenu({ isOpen, onClose, onNavigate, onLogout }: UserMenuProps) {
+  const { user } = useAuth();
+
   const handleNavigate = (page: string) => {
     onNavigate(page);
     onClose();
@@ -43,7 +46,7 @@ export function UserMenu({ isOpen, onClose, onNavigate, onLogout }: UserMenuProp
         <div className="p-4">
           <div className="mb-6 p-4 bg-slate-50 rounded-lg">
             <p className="text-sm text-slate-600">Ingelogd als</p>
-            <p className="font-medium text-slate-900">demo@huizehoreca.nl</p>
+            <p className="font-medium text-slate-900">{user?.email || 'Onbekend'}</p>
           </div>
 
           <nav className="space-y-1">
