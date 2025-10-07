@@ -19,10 +19,15 @@ export function Offertes() {
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setQuotes(data || []);
+      if (error) {
+        console.error('Error fetching quotes:', error);
+        setQuotes([]);
+      } else {
+        setQuotes(data || []);
+      }
     } catch (error) {
       console.error('Error fetching quotes:', error);
+      setQuotes([]);
     } finally {
       setLoading(false);
     }
