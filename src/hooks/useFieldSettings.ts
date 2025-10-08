@@ -20,14 +20,17 @@ const COMPANY_ID = '00000000-0000-0000-0000-000000000001';
 const settingsCache = new Map<string, { data: FieldConfig; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000;
 
+const ALL_TABS = ['basis', 'inkoop', 'voorraad', 'categorie', 'dranken', 'wijn', 'verkoop', 'extra'];
+
 export function useFieldSettings(category: string | undefined) {
   const [fieldConfig, setFieldConfig] = useState<FieldConfig>({});
   const [loading, setLoading] = useState(true);
-  const [availableTabs, setAvailableTabs] = useState<string[]>(['basis']);
+  const [availableTabs, setAvailableTabs] = useState<string[]>(ALL_TABS);
 
   useEffect(() => {
     if (!category) {
       setLoading(false);
+      setAvailableTabs(ALL_TABS);
       return;
     }
 
@@ -40,7 +43,7 @@ export function useFieldSettings(category: string | undefined) {
     const cached = settingsCache.get(cat);
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
       setFieldConfig(cached.data);
-      extractTabs(cached.data);
+      setAvailableTabs(ALL_TABS);
       setLoading(false);
       return;
     }
@@ -65,23 +68,14 @@ export function useFieldSettings(category: string | undefined) {
 
       settingsCache.set(cat, { data: config, timestamp: Date.now() });
       setFieldConfig(config);
-      extractTabs(config);
+      setAvailableTabs(ALL_TABS);
     } catch (err) {
       console.error('Error loading field settings:', err);
       setFieldConfig({});
+      setAvailableTabs(ALL_TABS);
     } finally {
       setLoading(false);
     }
-  };
-
-  const extractTabs = (config: FieldConfig) => {
-    const tabs = new Set<string>(['basis']);
-    Object.values(config).forEach(setting => {
-      if (setting.tab) {
-        tabs.add(setting.tab);
-      }
-    });
-    setAvailableTabs(Array.from(tabs));
   };
 
   const shouldShowField = (fieldName: string): boolean => {
