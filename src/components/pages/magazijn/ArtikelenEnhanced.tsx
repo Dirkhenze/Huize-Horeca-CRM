@@ -167,13 +167,15 @@ export function ArtikelenEnhanced() {
   const [formData, setFormData] = useState<Partial<Product>>({});
   const [activeTab, setActiveTab] = useState('basis');
 
+  const hoofdcategorie = editingProduct?.hoofdcategorie || editingProduct?.category;
+
   const {
     shouldShowField,
     isFieldDisabled,
     getFieldTab,
     availableTabs,
     loading: settingsLoading
-  } = useFieldSettings(editingProduct?.hoofdcategorie);
+  } = useFieldSettings(hoofdcategorie);
 
   useEffect(() => {
     fetchProducts();
@@ -417,7 +419,7 @@ export function ArtikelenEnhanced() {
                 <h2 className="text-xl font-bold text-slate-900">{formData.artikelnaam}</h2>
                 <p className="text-sm text-slate-500">
                   Artikelnummer: {formData.artikelnummer}
-                  {formData.hoofdcategorie && ` • ${formData.hoofdcategorie}`}
+                  {hoofdcategorie && ` • ${hoofdcategorie}`}
                 </p>
               </div>
               <button onClick={handleCancel} className="text-slate-400 hover:text-slate-600">
@@ -425,7 +427,7 @@ export function ArtikelenEnhanced() {
               </button>
             </div>
 
-            {!formData.hoofdcategorie && (
+            {!hoofdcategorie && (
               <div className="mx-6 mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-2">
                 <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-blue-800">
