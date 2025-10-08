@@ -20,7 +20,7 @@ import { Chauffeurs } from './pages/logistiek/Chauffeurs';
 import { Routes } from './pages/logistiek/Routes';
 
 import { Voorraad } from './pages/magazijn/Voorraad';
-import { Artikelen } from './pages/magazijn/Artikelen';
+import { ArtikelenEnhanced as Artikelen } from './pages/magazijn/ArtikelenEnhanced';
 
 import { Klantenorders } from './pages/verkoop/Klantenorders';
 import { Facturen } from './pages/verkoop/Facturen';
