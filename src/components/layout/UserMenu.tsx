@@ -1,4 +1,4 @@
-import { X, Users, Building2, Settings, LogOut } from 'lucide-react';
+import { X, Users, Building2, Settings, LogOut, SlidersHorizontal } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface UserMenuProps {
@@ -12,6 +12,7 @@ const menuItems = [
   { id: 'gebruikers', label: 'Gebruikers', icon: Users },
   { id: 'bedrijfsgegevens', label: 'Bedrijfsgegevens', icon: Building2 },
   { id: 'instellingen', label: 'Instellingen', icon: Settings },
+  { id: 'artikelvelden-instellingen', label: 'Artikelvelden per Categorie', icon: SlidersHorizontal },
 ];
 
 export function UserMenu({ isOpen, onClose, onNavigate, onLogout }: UserMenuProps) {
