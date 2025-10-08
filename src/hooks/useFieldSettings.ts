@@ -78,7 +78,7 @@ export function useFieldSettings(category: string | undefined) {
     }
   };
 
-  const shouldShowField = (fieldName: string): boolean => {
+  const shouldShowField = (): boolean => {
     return true;
   };
 

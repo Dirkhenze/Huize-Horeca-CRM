@@ -251,7 +251,7 @@ export function ArtikelenEnhanced() {
 
   const renderField = (fieldDef: FieldDefinition) => {
     const fieldName = fieldDef.name as string;
-    const visible = shouldShowField(fieldName);
+    const visible = shouldShowField();
     const disabled = isFieldDisabled(fieldName);
     const tab = getFieldTab(fieldName, fieldDef.defaultTab);
 
