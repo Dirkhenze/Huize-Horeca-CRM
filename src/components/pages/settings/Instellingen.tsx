@@ -79,12 +79,20 @@ const API_SERVICES: APIService[] = [
 ];
 
 export function Instellingen() {
+  const [activeTab, setActiveTab] = useState('api');
   const [savedKeys, setSavedKeys] = useState<Record<string, SavedKey>>({});
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const tabs = [
+    { id: 'api', label: 'API Verbindingen' },
+    { id: 'algemeen', label: 'Algemeen' },
+    { id: 'notificaties', label: 'Notificaties' },
+    { id: 'beveiliging', label: 'Beveiliging' },
+  ];
 
   useEffect(() => {
     loadApiKeys();
@@ -228,12 +236,32 @@ export function Instellingen() {
 
   return (
     <div>
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-3xl font-bold text-slate-900 mb-2">Instellingen</h1>
         <p className="text-slate-600">Beheer API-verbindingen en systeeminstellingen</p>
       </div>
 
-      {message && (
+      <div className="border-b border-slate-200 mb-6">
+        <div className="flex gap-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-6 py-3 font-medium text-sm transition border-b-2 ${
+                activeTab === tab.id
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {activeTab === 'api' && (
+        <div>
+          {message && (
         <div
           className={`mb-6 rounded-lg p-4 border-l-4 ${
             message.type === 'success'
@@ -406,7 +434,7 @@ export function Instellingen() {
         </div>
       </div>
 
-      <div className="mt-6 bg-blue-50 rounded-xl p-6 border border-blue-200">
+          <div className="mt-6 bg-blue-50 rounded-xl p-6 border border-blue-200">
         <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
           <AlertCircle className="w-5 h-5" />
           Beveiliging
@@ -415,7 +443,30 @@ export function Instellingen() {
           API keys worden veilig opgeslagen in de database met Row Level Security. Alleen
           gebruikers binnen jouw bedrijf kunnen deze keys bekijken en bewerken.
         </p>
-      </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'algemeen' && (
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <h2 className="text-xl font-semibold text-slate-900 mb-4">Algemene Instellingen</h2>
+          <p className="text-slate-600">Algemene systeeminstellingen komen hier...</p>
+        </div>
+      )}
+
+      {activeTab === 'notificaties' && (
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <h2 className="text-xl font-semibold text-slate-900 mb-4">Notificaties</h2>
+          <p className="text-slate-600">Notificatie-instellingen komen hier...</p>
+        </div>
+      )}
+
+      {activeTab === 'beveiliging' && (
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <h2 className="text-xl font-semibold text-slate-900 mb-4">Beveiligingsinstellingen</h2>
+          <p className="text-slate-600">Beveiligingsinstellingen komen hier...</p>
+        </div>
+      )}
     </div>
   );
 }

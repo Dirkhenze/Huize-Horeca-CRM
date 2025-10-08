@@ -31,6 +31,7 @@ import { TopKansen } from './pages/trendz/TopKansen';
 import { Contacten } from './pages/contacten/Contacten';
 import { Instellingen } from './pages/settings/Instellingen';
 import { ArtikelveldenInstellingen } from './pages/settings/ArtikelveldenInstellingen';
+import { Tools } from './pages/settings/Tools';
 
 export function HuizeDashboard() {
   const { signOut } = useAuth();
@@ -53,6 +54,10 @@ export function HuizeDashboard() {
 
     if (activePage === 'artikelvelden-instellingen') {
       return <ArtikelveldenInstellingen />;
+    }
+
+    if (activePage === 'tools') {
+      return <Tools />;
     }
 
     if (activePage === 'team') {

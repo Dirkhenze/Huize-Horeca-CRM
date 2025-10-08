@@ -259,8 +259,8 @@ export function ArtikelenEnhanced() {
     if (tab !== activeTab) return null;
 
     const value = formData[fieldDef.name];
-    const inputClass = `w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-      disabled ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''
+    const inputClass = `w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+      disabled ? 'bg-blue-50 text-slate-500 border-blue-200 cursor-not-allowed' : 'border-slate-300'
     }`;
 
     const renderInput = () => {
@@ -316,12 +316,12 @@ export function ArtikelenEnhanced() {
         <div key={fieldDef.name} className="col-span-2">
           <label className="flex items-center gap-2">
             {renderInput()}
-            <span className={`text-sm font-medium ${disabled ? 'text-gray-500' : 'text-slate-700'}`}>
+            <span className={`text-sm font-medium ${disabled ? 'text-slate-500' : 'text-slate-700'}`}>
               {fieldDef.label}
             </span>
             {disabled && (
               <div className="relative group">
-                <Info className="w-4 h-4 text-gray-400 cursor-help" />
+                <Info className="w-4 h-4 text-blue-400 cursor-help" />
                 <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-48 p-2 bg-slate-800 text-white text-xs rounded shadow-lg z-10">
                   Niet van toepassing voor deze productgroep
                 </div>
@@ -334,11 +334,11 @@ export function ArtikelenEnhanced() {
 
     return (
       <div key={fieldDef.name} className={fieldDef.type === 'textarea' ? 'col-span-2' : ''}>
-        <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
+        <label className={`block text-sm font-medium mb-2 flex items-center gap-2 ${disabled ? 'text-slate-500' : 'text-slate-700'}`}>
           {fieldDef.label}
           {disabled && (
             <div className="relative group">
-              <Info className="w-4 h-4 text-gray-400 cursor-help" />
+              <Info className="w-4 h-4 text-blue-400 cursor-help" />
               <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-48 p-2 bg-slate-800 text-white text-xs rounded shadow-lg z-10">
                 Niet van toepassing voor deze productgroep
               </div>
