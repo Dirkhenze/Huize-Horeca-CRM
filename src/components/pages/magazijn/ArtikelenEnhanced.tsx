@@ -413,7 +413,7 @@ export function ArtikelenEnhanced() {
 
       {editingProduct && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] flex flex-col">
+          <div className="bg-white rounded-lg max-w-5xl w-full h-[90vh] flex flex-col">
             <div className="bg-white border-b px-6 py-4 flex justify-between items-center">
               <div>
                 <h2 className="text-xl font-bold text-slate-900">{formData.artikelnaam}</h2>

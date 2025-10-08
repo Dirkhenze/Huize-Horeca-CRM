@@ -79,15 +79,13 @@ export function useFieldSettings(category: string | undefined) {
   };
 
   const shouldShowField = (fieldName: string): boolean => {
-    const setting = fieldConfig[fieldName];
-    if (!setting) return true;
-    return setting.visible;
+    return true;
   };
 
   const isFieldDisabled = (fieldName: string): boolean => {
     const setting = fieldConfig[fieldName];
     if (!setting) return false;
-    return setting.disabled;
+    return !setting.visible || setting.disabled;
   };
 
   const getFieldTab = (fieldName: string, defaultTab: string = 'basis'): string => {
