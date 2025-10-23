@@ -17,54 +17,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const demoSession = localStorage.getItem('supabase.auth.token');
-    if (demoSession) {
-      try {
-        const parsed = JSON.parse(demoSession);
-        if (parsed.user) {
-          setUser(parsed.user as User);
-          setLoading(false);
-          return;
-        }
-      } catch (e) {
-        localStorage.removeItem('supabase.auth.token');
-      }
-    }
-
-    const ensureUserHasCompany = async (user: User, session: any) => {
-      const companyId = user.app_metadata?.company_id;
-      if (!companyId) {
-        try {
-          const newCompanyId = crypto.randomUUID();
-          const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/setup-user-company`;
-          const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${session?.access_token}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ companyId: newCompanyId }),
-          });
-
-          if (response.ok) {
-            await supabase.auth.refreshSession();
-            const { data: { session: newSession } } = await supabase.auth.getSession();
-            if (newSession?.user) {
-              setUser(newSession.user);
-            }
-          }
-        } catch (err) {
-          console.error('Error ensuring user has company:', err);
-        }
-      }
-    };
-
     supabase.auth.getSession()
       .then(({ data: { session } }) => {
         setUser(session?.user ?? null);
-        if (session?.user) {
-          ensureUserHasCompany(session.user, session);
-        }
         setLoading(false);
       })
       .catch((error) => {
@@ -73,12 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      (async () => {
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await ensureUserHasCompany(session.user, session);
-        }
-      })();
+      setUser(session?.user ?? null);
     });
 
     return () => subscription.unsubscribe();
@@ -117,8 +67,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    localStorage.removeItem('supabase.auth.token');
-    setUser(null);
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   };

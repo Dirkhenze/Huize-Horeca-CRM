@@ -5,6 +5,7 @@ import { Lead, TeamMember } from '../../../lib/types';
 import LeadForm from './LeadForm';
 import LeadDetails from './LeadDetails';
 import { fallbackAccountManagers } from '../../../data/fallbackAccountManagers';
+import { useAuth } from '../../../contexts/AuthContext';
 
 const KLANTTYPE_CATEGORIES = [
   { value: 'brouwerijen', label: 'Brouwerijen — brouwerijen en bierproducenten' },
@@ -19,6 +20,7 @@ const KLANTTYPE_CATEGORIES = [
 ];
 
 export default function LeadManagement() {
+  const { user } = useAuth();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [accountManagers, setAccountManagers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,7 +46,8 @@ export default function LeadManagement() {
       if (error) throw error;
       setLeads(data || []);
     } catch (error) {
-      console.error('Error loading leads:', error);
+      console.log('ℹ️ [LeadManagement] Could not load leads:', error);
+      setLeads([]);
     } finally {
       setLoading(false);
     }
@@ -54,15 +57,14 @@ export default function LeadManagement() {
     try {
       console.log('🔍 [LeadManagement] Starting to load account managers from sales_team...');
 
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         console.log('ℹ️ [LeadManagement] No authenticated user, using fallback data');
         setAccountManagers(fallbackAccountManagers);
         return;
       }
 
-      const companyId = '00000000-0000-0000-0000-000000000001';
-      console.log('🏢 [LeadManagement] Using company_id:', companyId);
+      const companyId = user.app_metadata?.company_id || '00000000-0000-0000-0000-000000000001';
+      console.log('🏢 [LeadManagement] User:', user.email, 'Company ID:', companyId);
 
       const { data, error } = await supabase
         .from('sales_team')
@@ -91,7 +93,7 @@ export default function LeadManagement() {
       setErrorMessage(null);
       console.log('✅ [LeadManagement] Successfully loaded', data.length, 'account managers from sales_team');
     } catch (error: any) {
-      console.error('❌ [LeadManagement] Critical error, using fallback:', error);
+      console.log('ℹ️ [LeadManagement] Using fallback data due to exception');
       setAccountManagers(fallbackAccountManagers);
       setErrorMessage(null);
     }

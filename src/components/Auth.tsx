@@ -16,21 +16,6 @@ export function Auth() {
     setLoading(true);
 
     try {
-      if (email === 'dirk.henze@huizehoreca.nl' && password === 'Promdech?1980') {
-        const demoSession = {
-          access_token: 'demo-token',
-          user: {
-            id: 'demo-user-id',
-            email: 'dirk.henze@huizehoreca.nl',
-            aud: 'authenticated',
-            role: 'authenticated'
-          }
-        };
-        localStorage.setItem('supabase.auth.token', JSON.stringify(demoSession));
-        window.location.reload();
-        return;
-      }
-
       if (isSignUp) {
         await signUp(email, password);
       } else {
