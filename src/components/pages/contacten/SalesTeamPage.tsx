@@ -25,19 +25,10 @@ export default function SalesTeamPage() {
     try {
       setLoading(true);
 
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('company_id')
-        .eq('id', user?.id)
-        .single();
-
-      if (userError) throw userError;
-
       const { data, error } = await supabase
         .from('sales_team')
         .select('*')
-        .eq('company_id', userData.company_id)
-        .order('first_name');
+        .order('employee_number');
 
       if (error) throw error;
 
