@@ -10,35 +10,32 @@ interface SidebarProps {
 
 const sidebarMenus: Record<NavCategory, { id: string; label: string; icon: any }[]> = {
   sales: [
-    { id: 'offertes', label: 'Offertes', icon: FileText },
+    { id: 'sales-team', label: 'Sales Team', icon: Users },
+    { id: 'lead-management', label: 'Lead Management', icon: UserCheck },
     { id: 'prijzen', label: 'Prijzen', icon: DollarSign },
-    { id: 'price-upload', label: 'Prijslijst Uploaden', icon: Upload },
+    { id: 'offertes', label: 'Offertes', icon: FileText },
     { id: 'marketing', label: 'Marketing', icon: Megaphone },
-    { id: 'team', label: 'Team', icon: Users },
-    { id: 'analytics', label: 'Sales Analytics Dashboard', icon: BarChart3 },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'accountmanagers-leveranciers', label: 'AM Leveranciers', icon: UserPlus },
   ],
   inkoop: [
     { id: 'artikelen-invoeren', label: 'Artikelen invoeren', icon: Package },
     { id: 'besteladvies', label: 'Besteladvies', icon: TrendingUp },
-    { id: 'team', label: 'Team', icon: Users },
   ],
   logistiek: [
     { id: 'autos', label: "Auto's", icon: Truck },
     { id: 'chauffeurs', label: 'Chauffeurs', icon: UserCircle },
     { id: 'routes', label: 'Routes', icon: Route },
     { id: 'planning', label: 'Planning', icon: Calendar },
-    { id: 'team', label: 'Team', icon: Users },
   ],
   magazijn: [
     { id: 'voorraad', label: 'Voorraad', icon: Warehouse },
     { id: 'artikelen', label: 'Artikelen', icon: Package },
-    { id: 'team', label: 'Team', icon: Users },
   ],
   verkoop: [
     { id: 'klantenorders', label: 'Klantenorders', icon: ShoppingCart },
     { id: 'facturen', label: 'Facturen', icon: FileCheck },
     { id: 'kortingen', label: 'Kortingen', icon: Percent },
-    { id: 'team', label: 'Team', icon: Users },
   ],
   trendz: [
     { id: 'top-kansen', label: 'Top kansen', icon: Sparkles },
@@ -47,13 +44,9 @@ const sidebarMenus: Record<NavCategory, { id: string; label: string; icon: any }
     { id: 'cross-sell-artikel', label: 'Cross-sell (artikel)', icon: Target },
     { id: 'cross-sell-productgroep', label: 'Cross-sell (productgroep)', icon: Activity },
     { id: 'achterblijvers', label: 'Klanten onder markt', icon: TrendingDown },
-    { id: 'team', label: 'Team', icon: Users },
   ],
   contacten: [
-    { id: 'lead-management', label: 'Lead Management', icon: UserCheck },
     { id: 'klanten', label: 'Klanten', icon: Building2 },
-    { id: 'sales-team', label: 'Sales Team', icon: Users },
-    { id: 'accountmanagers-leveranciers', label: 'Accountmanagers (Leveranciers)', icon: UserPlus },
     { id: 'leveranciers', label: 'Leveranciers', icon: Truck },
   ],
 };

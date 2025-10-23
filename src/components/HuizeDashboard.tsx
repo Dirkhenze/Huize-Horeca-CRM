@@ -7,10 +7,8 @@ import { Breadcrumbs } from './layout/Breadcrumbs';
 import { useAuth } from '../contexts/AuthContext';
 
 import { Offertes } from './pages/sales/Offertes';
-import { Prijzen } from './pages/sales/Prijzen';
-import { SalesAnalytics } from './pages/sales/SalesAnalytics';
-import { PriceUpload } from './pages/sales/PriceUpload';
-import { TeamPage } from './pages/common/TeamPage';
+import PrijzenWithTabs from './pages/sales/PrijzenWithTabs';
+import Analytics from './pages/sales/Analytics';
 
 import { ArtikelenInvoeren } from './pages/inkoop/ArtikelenInvoeren';
 import { Besteladvies } from './pages/inkoop/Besteladvies';
@@ -40,13 +38,13 @@ import { Tools } from './pages/settings/Tools';
 export function HuizeDashboard() {
   const { signOut } = useAuth();
   const [activeCategory, setActiveCategory] = useState<NavCategory>('sales');
-  const [activePage, setActivePage] = useState('offertes');
+  const [activePage, setActivePage] = useState('sales-team');
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handlePageChange = (page: string) => {
     if (page === 'contacten') {
       setActiveCategory('contacten');
-      setActivePage('lead-management');
+      setActivePage('klanten');
     } else {
       setActivePage(page);
     }
@@ -55,8 +53,8 @@ export function HuizeDashboard() {
   const renderPage = () => {
     if (activePage === 'contacten') {
       setActiveCategory('contacten');
-      setActivePage('lead-management');
-      return <LeadManagement />;
+      setActivePage('klanten');
+      return <Contacten />;
     }
 
     if (activePage === 'instellingen') {
@@ -71,23 +69,25 @@ export function HuizeDashboard() {
       return <Tools />;
     }
 
-    if (activePage === 'team') {
-      return <TeamPage category={activeCategory} />;
-    }
-
     switch (activeCategory) {
       case 'sales':
         switch (activePage) {
+          case 'sales-team':
+            return <SalesTeamPage />;
+          case 'lead-management':
+            return <LeadManagement />;
+          case 'prijzen':
+            return <PrijzenWithTabs />;
           case 'offertes':
             return <Offertes />;
-          case 'prijzen':
-            return <Prijzen />;
-          case 'price-upload':
-            return <PriceUpload />;
+          case 'marketing':
+            return <div className="text-center py-12 text-gray-500">Marketing pagina - coming soon</div>;
           case 'analytics':
-            return <SalesAnalytics />;
+            return <Analytics />;
+          case 'accountmanagers-leveranciers':
+            return <SupplierAccountManagersPage />;
           default:
-            return <Offertes />;
+            return <SalesTeamPage />;
         }
 
       case 'inkoop':
@@ -142,20 +142,12 @@ export function HuizeDashboard() {
 
       case 'contacten':
         switch (activePage) {
-          case 'lead-management':
-            return <LeadManagement />;
           case 'klanten':
             return <Contacten />;
-          case 'sales-team':
-            return <SalesTeamPage />;
-          case 'accountmanagers-leveranciers':
-            return <SupplierAccountManagersPage />;
-          case 'accountmanagers':
-            return <AccountmanagersPage />;
           case 'leveranciers':
             return <Contacten />;
           default:
-            return <LeadManagement />;
+            return <Contacten />;
         }
 
       default:
@@ -169,7 +161,21 @@ export function HuizeDashboard() {
         activeCategory={activeCategory}
         onCategoryChange={(cat) => {
           setActiveCategory(cat);
-          setActivePage(cat === 'trendz' ? 'trendz-dashboard' : 'offertes');
+          if (cat === 'sales') {
+            setActivePage('sales-team');
+          } else if (cat === 'trendz') {
+            setActivePage('trendz-dashboard');
+          } else if (cat === 'contacten') {
+            setActivePage('klanten');
+          } else if (cat === 'inkoop') {
+            setActivePage('artikelen-invoeren');
+          } else if (cat === 'logistiek') {
+            setActivePage('autos');
+          } else if (cat === 'magazijn') {
+            setActivePage('voorraad');
+          } else if (cat === 'verkoop') {
+            setActivePage('klantenorders');
+          }
         }}
         onMenuToggle={() => setMenuOpen(true)}
       />
