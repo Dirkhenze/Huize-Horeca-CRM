@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Building2, Users, CircleUser as UserCircle } from 'lucide-react';
 import { Klanten } from './Klanten';
-import { Leveranciers } from './Leveranciers';
+import { LeveranciersEnhanced } from './LeveranciersEnhanced';
 import { AccountmanagersPage } from './AccountmanagersPage';
 
 type ContactTab = 'klanten' | 'leveranciers' | 'accountmanagers';
@@ -40,7 +40,7 @@ export function Contacten() {
       </div>
 
       {activeTab === 'klanten' && <Klanten />}
-      {activeTab === 'leveranciers' && <Leveranciers />}
+      {activeTab === 'leveranciers' && <LeveranciersEnhanced />}
       {activeTab === 'accountmanagers' && <AccountmanagersPage />}
     </div>
   );

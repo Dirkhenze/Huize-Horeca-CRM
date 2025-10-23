@@ -38,32 +38,38 @@ export default function LeadForm({ lead, accountManagers, onSave, onCancel }: Le
   console.log('🎨 [LeadForm] Rendering with', accountManagers?.length || 0, 'account managers');
 
   const [formData, setFormData] = useState({
-    datum_invoer: lead?.datum_invoer || new Date().toISOString().split('T')[0],
-    accountmanager_id: lead?.accountmanager_id || '',
-    herkomst: lead?.herkomst || '',
-    bedrijfsnaam: lead?.bedrijfsnaam || '',
-    klanttype: lead?.klanttype || '',
-    contactpersoon: lead?.contactpersoon || '',
-    telefoonnummer: lead?.telefoonnummer || '',
-    mobiel: lead?.mobiel || '',
-    email_algemeen: lead?.email_algemeen || '',
-    email_factuur: lead?.email_factuur || '',
-    straat_huisnummer: lead?.straat_huisnummer || '',
-    postcode: lead?.postcode || '',
-    plaats: lead?.plaats || '',
+    company_name: lead?.company_name || '',
+    customer_type: lead?.customer_type || '',
+    account_manager_id: lead?.account_manager_id || '',
+
+    address: lead?.address || '',
+    postal_code: lead?.postal_code || '',
+    city: lead?.city || '',
+    region: lead?.region || '',
+    delivery_address: lead?.delivery_address || '',
+
+    delivery_preference_days: lead?.delivery_preference_days || '',
+    delivery_time_slots: lead?.delivery_time_slots || '',
+    delivery_instructions: lead?.delivery_instructions || '',
+
+    contact_person: lead?.contact_person || '',
+    email: lead?.email || '',
+    phone: lead?.phone || '',
+    contact_role: lead?.contact_role || '',
+    secondary_contact_name: lead?.secondary_contact_name || '',
+    secondary_contact_email: lead?.secondary_contact_email || '',
+    secondary_contact_phone: lead?.secondary_contact_phone || '',
+
     iban: lead?.iban || '',
-    tenaamstelling: lead?.tenaamstelling || '',
-    bedrijfsleider: lead?.bedrijfsleider || '',
-    telefoon_bedrijfsleider: lead?.telefoon_bedrijfsleider || '',
-    datum_eerste_contact: lead?.datum_eerste_contact || '',
-    datum_bezoek: lead?.datum_bezoek || '',
-    datum_assortiment: lead?.datum_assortiment || '',
-    datum_offerte: lead?.datum_offerte || '',
-    datum_offerte_verstuurd: lead?.datum_offerte_verstuurd || '',
-    volgende_actie: lead?.volgende_actie || '',
-    datum_volgende_actie: lead?.datum_volgende_actie || '',
-    opmerkingen: lead?.opmerkingen || '',
-    status: lead?.status || 'Lead'
+    account_holder_name: lead?.account_holder_name || '',
+    payment_terms: lead?.payment_terms || '',
+    btw_number: lead?.btw_number || '',
+
+    assortment_interests: lead?.assortment_interests || '',
+    business_notes: lead?.business_notes || '',
+
+    status: lead?.status || 'Lead',
+    notes: lead?.notes || ''
   });
 
   const [saving, setSaving] = useState(false);
@@ -88,13 +94,7 @@ export default function LeadForm({ lead, accountManagers, onSave, onCancel }: Le
       const leadData = {
         ...formData,
         company_id: teamMember.company_id,
-        accountmanager_id: formData.accountmanager_id || null,
-        datum_eerste_contact: formData.datum_eerste_contact || null,
-        datum_bezoek: formData.datum_bezoek || null,
-        datum_assortiment: formData.datum_assortiment || null,
-        datum_offerte: formData.datum_offerte || null,
-        datum_offerte_verstuurd: formData.datum_offerte_verstuurd || null,
-        datum_volgende_actie: formData.datum_volgende_actie || null
+        account_manager_id: formData.account_manager_id || null
       };
 
       if (lead) {
@@ -123,109 +123,43 @@ export default function LeadForm({ lead, accountManagers, onSave, onCancel }: Le
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <button
-          onClick={onCancel}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5 text-gray-600" />
-        </button>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {lead ? 'Lead bewerken' : 'Nieuwe lead'}
-          </h1>
-          <p className="text-gray-600 mt-1">Vul alle gegevens in voor de nieuwe lead</p>
+      {/* Header met LEAD-nummer */}
+      <div className="bg-gradient-to-r from-orange-50 to-orange-100 border-l-4 border-orange-500 rounded-lg p-4 sticky top-0 z-10 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={onCancel}
+              className="p-2 hover:bg-white rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {lead ? 'Lead bewerken' : 'Nieuwe lead'}
+              </h1>
+              <p className="text-gray-600 mt-1">Dynamisch formulier met progressieve validatie</p>
+            </div>
+          </div>
+          {lead?.temporary_customer_id && (
+            <div className="text-right">
+              <div className="text-xs text-orange-600 font-medium">LEADNUMMER</div>
+              <div className="text-2xl font-bold text-orange-600 font-mono tracking-wider">
+                {lead.temporary_customer_id}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">Status: {lead.status}</div>
+            </div>
+          )}
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-8">
+        {/* Sectie 1: Basis */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Basisgegevens</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Datum invoer
-              </label>
-              <input
-                type="date"
-                required
-                value={formData.datum_invoer}
-                onChange={(e) => setFormData({ ...formData, datum_invoer: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Accountmanager <span className="text-red-500">*</span>
-              </label>
-              <select
-                required
-                value={formData.accountmanager_id}
-                onChange={(e) => setFormData({ ...formData, accountmanager_id: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Selecteer accountmanager</option>
-                {accountManagers && accountManagers.length > 0 ? (
-                  accountManagers.map(manager => (
-                    <option key={manager.id} value={manager.id}>
-                      {manager.first_name} {manager.last_name}
-                    </option>
-                  ))
-                ) : (
-                  <option value="" disabled>Geen accountmanagers beschikbaar</option>
-                )}
-              </select>
-              {accountManagers && accountManagers.length === 0 && (
-                <p className="mt-1 text-sm text-orange-600">
-                  ⚠️ Geen accountmanagers geladen. Voer eerst de SQL fix uit.
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Herkomst
-              </label>
-              <select
-                value={formData.herkomst}
-                onChange={(e) => setFormData({ ...formData, herkomst: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Selecteer herkomst</option>
-                {HERKOMST_OPTIONS.map(option => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                Klanttype
-                <button
-                  type="button"
-                  onClick={() => setShowKlanttypeInfo(!showKlanttypeInfo)}
-                  className="text-blue-500 hover:text-blue-600"
-                >
-                  <Info className="w-4 h-4" />
-                </button>
-              </label>
-              <select
-                value={formData.klanttype}
-                onChange={(e) => setFormData({ ...formData, klanttype: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Selecteer klanttype</option>
-                {KLANTTYPE_OPTIONS.map(option => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Bedrijfsgegevens</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <span className="bg-orange-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">1</span>
+            Basisgegevens
+            <span className="text-xs text-gray-500 font-normal">(Verplicht voor alle leads)</span>
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -234,137 +168,277 @@ export default function LeadForm({ lead, accountManagers, onSave, onCancel }: Le
               <input
                 type="text"
                 required
-                value={formData.bedrijfsnaam}
-                onChange={(e) => setFormData({ ...formData, bedrijfsnaam: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={formData.company_name}
+                onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                Klanttype
+                <button
+                  type="button"
+                  onClick={() => setShowKlanttypeInfo(!showKlanttypeInfo)}
+                  className="text-orange-500 hover:text-orange-600"
+                >
+                  <Info className="w-4 h-4" />
+                </button>
+              </label>
+              <select
+                value={formData.customer_type}
+                onChange={(e) => setFormData({ ...formData, customer_type: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              >
+                <option value="">Selecteer klanttype</option>
+                {KLANTTYPE_OPTIONS.map(option => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Accountmanager <span className="text-red-500">*</span>
+              </label>
+              <select
+                required
+                value={formData.account_manager_id}
+                onChange={(e) => setFormData({ ...formData, account_manager_id: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              >
+                <option value="">Selecteer accountmanager</option>
+                {accountManagers?.map(manager => (
+                  <option key={manager.id} value={manager.id}>
+                    {manager.first_name} {manager.last_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Sectie 2: Adres */}
+        <div className="border-t pt-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <span className="bg-blue-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">2</span>
+            Adresgegevens
+            <span className="text-xs text-gray-500 font-normal">{formData.status === 'Offerte' || formData.status === 'Klant actief' ? '(Verplicht)' : '(Optioneel)'}</span>
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Straat & huisnummer
               </label>
               <input
                 type="text"
-                value={formData.straat_huisnummer}
-                onChange={(e) => setFormData({ ...formData, straat_huisnummer: e.target.value })}
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Postcode
               </label>
               <input
                 type="text"
-                value={formData.postcode}
-                onChange={(e) => setFormData({ ...formData, postcode: e.target.value })}
+                value={formData.postal_code}
+                onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Plaats
               </label>
               <input
                 type="text"
-                value={formData.plaats}
-                onChange={(e) => setFormData({ ...formData, plaats: e.target.value })}
+                value={formData.city}
+                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Bedrijfsleider
+                Regio
               </label>
               <input
                 type="text"
-                value={formData.bedrijfsleider}
-                onChange={(e) => setFormData({ ...formData, bedrijfsleider: e.target.value })}
+                value={formData.region}
+                onChange={(e) => setFormData({ ...formData, region: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Telefoon bedrijfsleider
+                Leveradres (indien afwijkend)
               </label>
               <input
-                type="tel"
-                value={formData.telefoon_bedrijfsleider}
-                onChange={(e) => setFormData({ ...formData, telefoon_bedrijfsleider: e.target.value })}
+                type="text"
+                value={formData.delivery_address}
+                onChange={(e) => setFormData({ ...formData, delivery_address: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
         </div>
 
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Contactgegevens</h2>
+        {/* Sectie 3: Levering */}
+        <div className="border-t pt-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <span className="bg-green-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">3</span>
+            Leveringsinformatie
+            <span className="text-xs text-gray-500 font-normal">{formData.status === 'Offerte' || formData.status === 'Klant actief' ? '(Verplicht)' : '(Optioneel)'}</span>
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Contactpersoon
+                Voorkeur leveringsdagen
               </label>
               <input
                 type="text"
-                value={formData.contactpersoon}
-                onChange={(e) => setFormData({ ...formData, contactpersoon: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Bijv: Maandag, Woensdag"
+                value={formData.delivery_preference_days}
+                onChange={(e) => setFormData({ ...formData, delivery_preference_days: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Telefoonnummer
+                Tijdvakken
               </label>
               <input
-                type="tel"
-                value={formData.telefoonnummer}
-                onChange={(e) => setFormData({ ...formData, telefoonnummer: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                type="text"
+                placeholder="Bijv: 08:00-12:00"
+                value={formData.delivery_time_slots}
+                onChange={(e) => setFormData({ ...formData, delivery_time_slots: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
-
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Mobiel
+                Leveringsinstructies
               </label>
-              <input
-                type="tel"
-                value={formData.mobiel}
-                onChange={(e) => setFormData({ ...formData, mobiel: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              <textarea
+                rows={2}
+                value={formData.delivery_instructions}
+                onChange={(e) => setFormData({ ...formData, delivery_instructions: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
+          </div>
+        </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email algemeen
-              </label>
-              <input
-                type="email"
-                value={formData.email_algemeen}
-                onChange={(e) => setFormData({ ...formData, email_algemeen: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+        {/* Sectie 4: Contact */}
+        <div className="border-t pt-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <span className="bg-purple-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">4</span>
+            Contactpersonen
+            <span className="text-xs text-gray-500 font-normal">(Minimaal 1 contactpersoon)</span>
+          </h2>
+          <div className="space-y-4">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="font-medium text-gray-900 mb-3">Primair contact</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Naam <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.contact_person}
+                    onChange={(e) => setFormData({ ...formData, contact_person: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Rol/Functie
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.contact_role}
+                    onChange={(e) => setFormData({ ...formData, contact_role: e.target.value })}
+                    placeholder="Bijv: Eigenaar, Manager"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Telefoon
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email factuur
-              </label>
-              <input
-                type="email"
-                value={formData.email_factuur}
-                onChange={(e) => setFormData({ ...formData, email_factuur: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="font-medium text-gray-900 mb-3">Secundair contact (optioneel)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Naam
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.secondary_contact_name}
+                    onChange={(e) => setFormData({ ...formData, secondary_contact_name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Telefoon
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.secondary_contact_phone}
+                    onChange={(e) => setFormData({ ...formData, secondary_contact_phone: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.secondary_contact_email}
+                    onChange={(e) => setFormData({ ...formData, secondary_contact_email: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
             </div>
+          </div>
+        </div>
 
+        {/* Sectie 5: Financieel */}
+        <div className="border-t pt-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <span className="bg-yellow-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">5</span>
+            Financiële gegevens
+            <span className="text-xs text-gray-500 font-normal">{formData.status === 'Klant actief' ? '(Verplicht voor klanten)' : '(Optioneel)'}</span>
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 IBAN
@@ -373,137 +447,101 @@ export default function LeadForm({ lead, accountManagers, onSave, onCancel }: Le
                 type="text"
                 value={formData.iban}
                 onChange={(e) => setFormData({ ...formData, iban: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="NL00 BANK 0000 0000 00"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tenaamstelling
+                T.N.V. (tenaamstelling)
               </label>
               <input
                 type="text"
-                value={formData.tenaamstelling}
-                onChange={(e) => setFormData({ ...formData, tenaamstelling: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={formData.account_holder_name}
+                onChange={(e) => setFormData({ ...formData, account_holder_name: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Betaalconditie
+              </label>
+              <select
+                value={formData.payment_terms}
+                onChange={(e) => setFormData({ ...formData, payment_terms: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              >
+                <option value="">Selecteer betaalconditie</option>
+                <option value="Direct">Direct</option>
+                <option value="7 dagen">7 dagen</option>
+                <option value="14 dagen">14 dagen</option>
+                <option value="30 dagen">30 dagen</option>
+                <option value="60 dagen">60 dagen</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                BTW-nummer
+              </label>
+              <input
+                type="text"
+                value={formData.btw_number}
+                onChange={(e) => setFormData({ ...formData, btw_number: e.target.value })}
+                placeholder="NL000000000B00"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
               />
             </div>
           </div>
         </div>
 
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Workflow datums</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Eerste contact
-              </label>
-              <input
-                type="date"
-                value={formData.datum_eerste_contact}
-                onChange={(e) => setFormData({ ...formData, datum_eerste_contact: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Bezoek gepland
-              </label>
-              <input
-                type="date"
-                value={formData.datum_bezoek}
-                onChange={(e) => setFormData({ ...formData, datum_bezoek: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Assortiment besproken
-              </label>
-              <input
-                type="date"
-                value={formData.datum_assortiment}
-                onChange={(e) => setFormData({ ...formData, datum_assortiment: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Offerte gemaakt
-              </label>
-              <input
-                type="date"
-                value={formData.datum_offerte}
-                onChange={(e) => setFormData({ ...formData, datum_offerte: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Offerte verstuurd
-              </label>
-              <input
-                type="date"
-                value={formData.datum_offerte_verstuurd}
-                onChange={(e) => setFormData({ ...formData, datum_offerte_verstuurd: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Datum volgende actie
-              </label>
-              <input
-                type="date"
-                value={formData.datum_volgende_actie}
-                onChange={(e) => setFormData({ ...formData, datum_volgende_actie: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Volgende stap & opmerkingen</h2>
+        {/* Sectie 6: Business */}
+        <div className="border-t pt-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <span className="bg-indigo-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">6</span>
+            Business informatie
+            <span className="text-xs text-gray-500 font-normal">(Optioneel)</span>
+          </h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Volgende actie
+                Assortimentsinteresse
               </label>
               <input
                 type="text"
-                value={formData.volgende_actie}
-                onChange={(e) => setFormData({ ...formData, volgende_actie: e.target.value })}
-                placeholder="Bijv: Bellen voor vervolgafspraak"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={formData.assortment_interests}
+                onChange={(e) => setFormData({ ...formData, assortment_interests: e.target.value })}
+                placeholder="Bijv: Bieren, Wijnen, Frisdranken"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Opmerkingen
+                Business opmerkingen
               </label>
               <textarea
                 rows={4}
-                value={formData.opmerkingen}
-                onChange={(e) => setFormData({ ...formData, opmerkingen: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={formData.business_notes}
+                onChange={(e) => setFormData({ ...formData, business_notes: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                placeholder="Interne notities, verkoopkansen, speciale afspraken..."
               />
             </div>
+          </div>
+        </div>
 
+        {/* Status en Algemene Opmerkingen */}
+        <div className="border-t pt-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Status en Opmerkingen</h2>
+          <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status
+                Status <span className="text-red-500">*</span>
               </label>
               <select
+                required
                 value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               >
                 <option value="Lead">Lead</option>
                 <option value="In behandeling">In behandeling</option>
@@ -512,6 +550,18 @@ export default function LeadForm({ lead, accountManagers, onSave, onCancel }: Le
                 <option value="Klant actief">Klant actief</option>
               </select>
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Algemene opmerkingen
+              </label>
+              <textarea
+                rows={4}
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                placeholder="Algemene notities over dit lead..."
+              />
+            </div>
           </div>
         </div>
 
@@ -519,10 +569,10 @@ export default function LeadForm({ lead, accountManagers, onSave, onCancel }: Le
           <button
             type="submit"
             disabled={saving}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
+            className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50 font-medium"
           >
             <Save className="w-4 h-4" />
-            {saving ? 'Opslaan...' : 'Opslaan'}
+            {saving ? 'Opslaan...' : (lead ? 'Wijzigingen opslaan' : 'Lead aanmaken')}
           </button>
           <button
             type="button"

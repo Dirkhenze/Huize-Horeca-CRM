@@ -52,7 +52,8 @@ const sidebarMenus: Record<NavCategory, { id: string; label: string; icon: any }
   contacten: [
     { id: 'lead-management', label: 'Lead Management', icon: UserCheck },
     { id: 'klanten', label: 'Klanten', icon: Building2 },
-    { id: 'accountmanagers', label: 'Accountmanagers', icon: Users },
+    { id: 'sales-team', label: 'Sales Team', icon: Users },
+    { id: 'accountmanagers-leveranciers', label: 'Accountmanagers (Leveranciers)', icon: UserPlus },
     { id: 'leveranciers', label: 'Leveranciers', icon: Truck },
   ],
 };

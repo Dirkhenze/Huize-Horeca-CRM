@@ -31,6 +31,8 @@ import { TopKansen } from './pages/trendz/TopKansen';
 import { Contacten } from './pages/contacten/Contacten';
 import LeadManagement from './pages/contacten/LeadManagement';
 import { AccountmanagersPage } from './pages/contacten/AccountmanagersPage';
+import SalesTeamPage from './pages/contacten/SalesTeamPage';
+import SupplierAccountManagersPage from './pages/contacten/SupplierAccountManagersPage';
 import { Instellingen } from './pages/settings/Instellingen';
 import { ArtikelveldenInstellingen } from './pages/settings/ArtikelveldenInstellingen';
 import { Tools } from './pages/settings/Tools';
@@ -144,6 +146,10 @@ export function HuizeDashboard() {
             return <LeadManagement />;
           case 'klanten':
             return <Contacten />;
+          case 'sales-team':
+            return <SalesTeamPage />;
+          case 'accountmanagers-leveranciers':
+            return <SupplierAccountManagersPage />;
           case 'accountmanagers':
             return <AccountmanagersPage />;
           case 'leveranciers':

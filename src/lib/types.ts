@@ -29,6 +29,70 @@ export interface Supplier {
   updated_at: string;
 }
 
+export interface SalesTeamMember {
+  id: string;
+  company_id: string;
+  user_id: string | null;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  mobile: string;
+  role: string;
+  function_title: string;
+  team_name: string;
+  employee_number: string;
+  is_active: boolean;
+  notes: string;
+  avatar_url: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SupplierAccountManager {
+  id: string;
+  company_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  mobile: string;
+  function_title: string;
+  is_active: boolean;
+  notes: string;
+  avatar_url: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SupplierAMAssignment {
+  id: string;
+  supplier_id: string;
+  account_manager_id: string;
+  is_primary: boolean;
+  assigned_at: string;
+  assigned_by: string | null;
+  notes: string;
+  created_at: string;
+  updated_at: string;
+  supplier?: Supplier;
+  account_manager?: SupplierAccountManager;
+}
+
+export interface AuditLogEntry {
+  id: string;
+  entity_type: string;
+  entity_id: string;
+  action: string;
+  changed_by: string | null;
+  changed_by_name: string;
+  old_values: any;
+  new_values: any;
+  ip_address: string;
+  user_agent: string;
+  created_at: string;
+}
+
 export interface AccountManager {
   id: string;
   supplier_id: string;
@@ -172,33 +236,43 @@ export interface Quote {
 export interface Lead {
   id: string;
   company_id: string;
-  datum_invoer: string;
-  accountmanager_id: string | null;
-  herkomst: string;
-  bedrijfsnaam: string;
-  klanttype: string;
-  contactpersoon: string;
-  telefoonnummer: string;
-  mobiel: string;
-  email_algemeen: string;
-  email_factuur: string;
-  straat_huisnummer: string;
-  postcode: string;
-  plaats: string;
+
+  temporary_customer_id?: string;
+
+  company_name: string;
+  customer_type: string;
+  account_manager_id: string | null;
+
+  address: string;
+  postal_code: string;
+  city: string;
+  region: string;
+  delivery_address: string;
+
+  delivery_preference_days: string;
+  delivery_time_slots: string;
+  delivery_instructions: string;
+
+  contact_person: string;
+  email: string;
+  phone: string;
+  contact_role: string;
+  secondary_contact_name: string;
+  secondary_contact_email: string;
+  secondary_contact_phone: string;
+
   iban: string;
-  tenaamstelling: string;
-  bedrijfsleider: string;
-  telefoon_bedrijfsleider: string;
-  datum_eerste_contact: string | null;
-  datum_bezoek: string | null;
-  datum_assortiment: string | null;
-  datum_offerte: string | null;
-  datum_offerte_verstuurd: string | null;
-  volgende_actie: string;
-  datum_volgende_actie: string | null;
-  opmerkingen: string;
+  account_holder_name: string;
+  payment_terms: string;
+  btw_number: string;
+
+  assortment_interests: string;
+  business_notes: string;
+
   status: 'Lead' | 'In behandeling' | 'Offerte' | 'Formulier gemaild' | 'Klant actief';
-  uniconta_klantnummer: string;
+  uniconta_customer_id: string;
+  notes: string;
+
   created_at: string;
   updated_at: string;
 }
