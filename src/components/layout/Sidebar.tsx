@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavCategory } from '../../lib/types';
-import { FileText, DollarSign, Megaphone, Users, BarChart3, Package, TrendingUp, Truck, CircleUser as UserCircle, Route, Calendar, Warehouse, ShoppingCart, FileCheck, Percent, Building2, UserPlus, Sparkles, AlertTriangle, TrendingDown, Target, Activity, Upload } from 'lucide-react';
+import { FileText, DollarSign, Megaphone, Users, BarChart3, Package, TrendingUp, Truck, CircleUser as UserCircle, Route, Calendar, Warehouse, ShoppingCart, FileCheck, Percent, Building2, UserPlus, Sparkles, AlertTriangle, TrendingDown, Target, Activity, Upload, UserCheck } from 'lucide-react';
 
 interface SidebarProps {
   activeCategory: NavCategory;
@@ -48,6 +48,12 @@ const sidebarMenus: Record<NavCategory, { id: string; label: string; icon: any }
     { id: 'cross-sell-productgroep', label: 'Cross-sell (productgroep)', icon: Activity },
     { id: 'achterblijvers', label: 'Klanten onder markt', icon: TrendingDown },
     { id: 'team', label: 'Team', icon: Users },
+  ],
+  contacten: [
+    { id: 'lead-management', label: 'Lead Management', icon: UserCheck },
+    { id: 'klanten', label: 'Klanten', icon: Building2 },
+    { id: 'accountmanagers', label: 'Accountmanagers', icon: Users },
+    { id: 'leveranciers', label: 'Leveranciers', icon: Truck },
   ],
 };
 

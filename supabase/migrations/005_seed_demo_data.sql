@@ -149,15 +149,16 @@ ON CONFLICT (product_id, warehouse_location) DO NOTHING;
 -- Insert sales team (accountmanagers)
 INSERT INTO team_members (company_id, first_name, last_name, email, phone, role, employee_number, department, is_active)
 VALUES
-  ('00000000-0000-0000-0000-000000000001', 'Bobby', 'Klein', 'bobby.klein@huizehoreca.nl', '0612345601', 'sales', 'HH001', 'Verkoop', true),
-  ('00000000-0000-0000-0000-000000000001', 'Dirk', 'Henze', 'dirk.henze@huizehoreca.nl', '0612345602', 'sales', 'HH002', 'Verkoop', true),
-  ('00000000-0000-0000-0000-000000000001', 'Emile', 'Metekohy', 'emile.metekohy@huizehoreca.nl', '0612345603', 'sales', 'HH003', 'Verkoop', true),
-  ('00000000-0000-0000-0000-000000000001', 'Maarten', 'Baas', 'maarten.baas@huizehoreca.nl', '0612345604', 'sales', 'HH004', 'Verkoop', true),
-  ('00000000-0000-0000-0000-000000000001', 'Patrick', 'Wiersema', 'patrick.wiersema@huizehoreca.nl', '0612345605', 'sales', 'HH005', 'Verkoop', true),
-  ('00000000-0000-0000-0000-000000000001', 'Paul', 'van Bennekom', 'paul.bennekom@huizehoreca.nl', '0612345606', 'sales', 'HH006', 'Verkoop', true),
-  ('00000000-0000-0000-0000-000000000001', 'Ron', 'van den Wurf', 'ron.wurf@huizehoreca.nl', '0612345607', 'sales', 'HH007', 'Verkoop', true),
-  ('00000000-0000-0000-0000-000000000001', 'Man', 'van Drank', 'man.drank@huizehoreca.nl', '0612345608', 'sales', 'HH008', 'Slijterij', true),
-  ('00000000-0000-0000-0000-000000000001', 'Jan', 'Binnendienst', 'jan.binnen@huizehoreca.nl', '0612345609', 'sales', 'HH009', 'Binnendienst', true)
+  ('00000000-0000-0000-0000-000000000001', 'Arie', 'Ouwerkerk', 'arie.ouwerkerk@huizehoreca.nl', '0612345601', 'sales', 'HH001', 'Verkoop', true),
+  ('00000000-0000-0000-0000-000000000001', 'Binnendienst', '', 'binnendienst@huizehoreca.nl', '0612345602', 'sales', 'HH002', 'Binnendienst', true),
+  ('00000000-0000-0000-0000-000000000001', 'Bobby', 'Klein', 'bobby.klein@huizehoreca.nl', '0612345603', 'sales', 'HH003', 'Verkoop', true),
+  ('00000000-0000-0000-0000-000000000001', 'Dirk', 'Henze', 'dirk.henze@huizehoreca.nl', '0612345604', 'sales', 'HH004', 'Verkoop', true),
+  ('00000000-0000-0000-0000-000000000001', 'Emile', 'Metekohy', 'emile.metekohy@huizehoreca.nl', '0612345605', 'sales', 'HH005', 'Verkoop', true),
+  ('00000000-0000-0000-0000-000000000001', 'Maarten', 'Baas', 'maarten.baas@huizehoreca.nl', '0612345606', 'sales', 'HH006', 'Verkoop', true),
+  ('00000000-0000-0000-0000-000000000001', 'Patrick', 'Wiersema', 'patrick.wiersema@huizehoreca.nl', '0612345607', 'sales', 'HH007', 'Verkoop', true),
+  ('00000000-0000-0000-0000-000000000001', 'Paul', 'van Bennekom', 'paul.bennekom@huizehoreca.nl', '0612345608', 'sales', 'HH008', 'Verkoop', true),
+  ('00000000-0000-0000-0000-000000000001', 'Ron', 'van der Wurf', 'ron.wurf@huizehoreca.nl', '0612345609', 'sales', 'HH009', 'Verkoop', true),
+  ('00000000-0000-0000-0000-000000000001', 'Slijterij Man', 'Van Drank', 'man.drank@huizehoreca.nl', '0612345610', 'sales', 'HH010', 'Slijterij', true)
 ON CONFLICT (company_id, employee_number) DO NOTHING;
 
 -- Insert inkoop team

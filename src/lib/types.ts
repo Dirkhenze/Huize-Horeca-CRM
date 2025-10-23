@@ -130,10 +130,15 @@ export interface AIInsight {
 export interface TeamMember {
   id: string;
   user_id: string | null;
-  name: string;
+  company_id?: string;
+  first_name: string;
+  last_name: string;
+  name?: string;
   role: 'sales' | 'inkoop' | 'logistiek' | 'magazijn' | '';
   email: string;
   phone: string;
+  department?: string;
+  avatar_url?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -164,4 +169,107 @@ export interface Quote {
   updated_at: string;
 }
 
-export type NavCategory = 'sales' | 'inkoop' | 'logistiek' | 'magazijn' | 'verkoop' | 'trendz';
+export interface Lead {
+  id: string;
+  company_id: string;
+  datum_invoer: string;
+  accountmanager_id: string | null;
+  herkomst: string;
+  bedrijfsnaam: string;
+  klanttype: string;
+  contactpersoon: string;
+  telefoonnummer: string;
+  mobiel: string;
+  email_algemeen: string;
+  email_factuur: string;
+  straat_huisnummer: string;
+  postcode: string;
+  plaats: string;
+  iban: string;
+  tenaamstelling: string;
+  bedrijfsleider: string;
+  telefoon_bedrijfsleider: string;
+  datum_eerste_contact: string | null;
+  datum_bezoek: string | null;
+  datum_assortiment: string | null;
+  datum_offerte: string | null;
+  datum_offerte_verstuurd: string | null;
+  volgende_actie: string;
+  datum_volgende_actie: string | null;
+  opmerkingen: string;
+  status: 'Lead' | 'In behandeling' | 'Offerte' | 'Formulier gemaild' | 'Klant actief';
+  uniconta_klantnummer: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Leversituatie {
+  id: string;
+  lead_id: string;
+  afleveradres: string;
+  afleverwensen: string;
+  aanvulling: string;
+  voorkeursdagen: string[];
+  tijden: string[];
+  minimale_bestelhoeveelheid: string;
+  chauffeursinstructies: string;
+  akkoord_voorwaarden: boolean;
+  handtekening_url: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ContactPersoon {
+  naam: string;
+  functie: string;
+  telefoon: string;
+  email: string;
+}
+
+export interface Klantformulier {
+  id: string;
+  lead_id: string;
+  juridische_naam: string;
+  handelsnaam: string;
+  btw_nummer: string;
+  kvk_nummer: string;
+  factuur_email: string;
+  betaalconditie: '14 dagen' | '30 dagen' | '45 dagen' | '';
+  bezorgadres: string;
+  contactpersonen: ContactPersoon[];
+  opmerkingen_admin: string;
+  bijlagen_urls: string[];
+  datum_ingevuld: string | null;
+  klaar_om_te_mailen: boolean;
+  datum_verzonden: string | null;
+  uniconta_klantnummer: string;
+  verzendstatus: 'Concept' | 'Verzonden' | 'Mislukt';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Tijdlijnactie {
+  id: string;
+  lead_id: string;
+  actie_type: 'Contact' | 'Bezoek' | 'Offerte' | 'Formulier' | 'Activatie' | 'Notitie';
+  verantwoordelijke_id: string | null;
+  datum: string;
+  notities: string;
+  bijlage_url: string;
+  created_at: string;
+}
+
+export interface Emailbericht {
+  id: string;
+  lead_id: string;
+  aan: string;
+  cc: string;
+  onderwerp: string;
+  inhoud_html: string;
+  bijlagen_urls: string[];
+  datum_verzonden: string;
+  status: 'Verzonden' | 'Mislukt';
+  created_at: string;
+}
+
+export type NavCategory = 'sales' | 'inkoop' | 'logistiek' | 'magazijn' | 'verkoop' | 'trendz' | 'contacten';

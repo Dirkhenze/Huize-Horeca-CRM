@@ -29,6 +29,8 @@ import { TrendzDashboard } from './pages/trendz/TrendzDashboard';
 import { TopKansen } from './pages/trendz/TopKansen';
 
 import { Contacten } from './pages/contacten/Contacten';
+import LeadManagement from './pages/contacten/LeadManagement';
+import { AccountmanagersPage } from './pages/contacten/AccountmanagersPage';
 import { Instellingen } from './pages/settings/Instellingen';
 import { ArtikelveldenInstellingen } from './pages/settings/ArtikelveldenInstellingen';
 import { Tools } from './pages/settings/Tools';
@@ -40,12 +42,19 @@ export function HuizeDashboard() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handlePageChange = (page: string) => {
-    setActivePage(page);
+    if (page === 'contacten') {
+      setActiveCategory('contacten');
+      setActivePage('lead-management');
+    } else {
+      setActivePage(page);
+    }
   };
 
   const renderPage = () => {
     if (activePage === 'contacten') {
-      return <Contacten />;
+      setActiveCategory('contacten');
+      setActivePage('lead-management');
+      return <LeadManagement />;
     }
 
     if (activePage === 'instellingen') {
@@ -127,6 +136,20 @@ export function HuizeDashboard() {
             return <TopKansen />;
           default:
             return <TrendzDashboard onNavigate={handlePageChange} />;
+        }
+
+      case 'contacten':
+        switch (activePage) {
+          case 'lead-management':
+            return <LeadManagement />;
+          case 'klanten':
+            return <Contacten />;
+          case 'accountmanagers':
+            return <AccountmanagersPage />;
+          case 'leveranciers':
+            return <Contacten />;
+          default:
+            return <LeadManagement />;
         }
 
       default:
