@@ -14,6 +14,8 @@ export default function SalesTeamPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingMember, setEditingMember] = useState<SalesTeamMember | null>(null);
+  const [showEditForm, setShowEditForm] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -75,6 +77,51 @@ export default function SalesTeamPage() {
 
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
+  };
+
+  const handleEdit = (member: SalesTeamMember) => {
+    setEditingMember(member);
+    setShowEditForm(true);
+  };
+
+  const handleDelete = async (member: SalesTeamMember) => {
+    if (!confirm(`Weet je zeker dat je ${member.first_name} ${member.last_name} wilt verwijderen?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('sales_team')
+        .delete()
+        .eq('id', member.id);
+
+      if (error) throw error;
+
+      await loadSalesTeam();
+    } catch (error) {
+      console.error('Error deleting member:', error);
+      alert('Fout bij verwijderen van teamlid');
+    }
+  };
+
+  const handleSaveEdit = async (updatedMember: Partial<SalesTeamMember>) => {
+    if (!editingMember) return;
+
+    try {
+      const { error } = await supabase
+        .from('sales_team')
+        .update(updatedMember)
+        .eq('id', editingMember.id);
+
+      if (error) throw error;
+
+      setShowEditForm(false);
+      setEditingMember(null);
+      await loadSalesTeam();
+    } catch (error) {
+      console.error('Error updating member:', error);
+      alert('Fout bij updaten van teamlid');
+    }
   };
 
   return (
@@ -200,10 +247,18 @@ export default function SalesTeamPage() {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
-                        <button className="p-1 text-gray-400 hover:text-blue-600 transition-colors">
+                        <button
+                          onClick={() => handleEdit(member)}
+                          className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                          title="Bewerken"
+                        >
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button className="p-1 text-gray-400 hover:text-red-600 transition-colors">
+                        <button
+                          onClick={() => handleDelete(member)}
+                          className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                          title="Verwijderen"
+                        >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -263,10 +318,18 @@ export default function SalesTeamPage() {
                     {member.is_active ? 'Actief' : 'Inactief'}
                   </span>
                   <div className="flex items-center gap-1">
-                    <button className="p-1 text-gray-400 hover:text-blue-600 transition-colors">
+                    <button
+                      onClick={() => handleEdit(member)}
+                      className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                      title="Bewerken"
+                    >
                       <Edit className="w-4 h-4" />
                     </button>
-                    <button className="p-1 text-gray-400 hover:text-red-600 transition-colors">
+                    <button
+                      onClick={() => handleDelete(member)}
+                      className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                      title="Verwijderen"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -282,6 +345,104 @@ export default function SalesTeamPage() {
           </div>
         )}
       </div>
+
+      {showEditForm && editingMember && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+            <h2 className="text-xl font-bold mb-4">Teamlid bewerken</h2>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              handleSaveEdit({
+                first_name: formData.get('first_name') as string,
+                last_name: formData.get('last_name') as string,
+                email: formData.get('email') as string,
+                phone: formData.get('phone') as string || null,
+                function_title: formData.get('function_title') as string,
+                team_name: formData.get('team_name') as string,
+              });
+            }}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Voornaam</label>
+                  <input
+                    type="text"
+                    name="first_name"
+                    defaultValue={editingMember.first_name}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Achternaam</label>
+                  <input
+                    type="text"
+                    name="last_name"
+                    defaultValue={editingMember.last_name}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    defaultValue={editingMember.email}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Telefoon</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    defaultValue={editingMember.phone || ''}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Functie</label>
+                  <input
+                    type="text"
+                    name="function_title"
+                    defaultValue={editingMember.function_title || ''}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Team</label>
+                  <input
+                    type="text"
+                    name="team_name"
+                    defaultValue={editingMember.team_name || ''}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditForm(false);
+                    setEditingMember(null);
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Annuleren
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Opslaan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

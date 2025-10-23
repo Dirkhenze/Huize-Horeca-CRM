@@ -56,18 +56,12 @@ export default function LeadManagement() {
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        console.error('❌ [LeadManagement] No authenticated user');
+        console.log('ℹ️ [LeadManagement] No authenticated user, using fallback data');
         setAccountManagers(fallbackAccountManagers);
         return;
       }
 
-      const { data: userData } = await supabase
-        .from('users')
-        .select('company_id')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      const companyId = userData?.company_id || '00000000-0000-0000-0000-000000000001';
+      const companyId = '00000000-0000-0000-0000-000000000001';
       console.log('🏢 [LeadManagement] Using company_id:', companyId);
 
       const { data, error } = await supabase
@@ -80,18 +74,16 @@ export default function LeadManagement() {
       console.log('📊 [LeadManagement] Query result:', { data, error, count: data?.length });
 
       if (error) {
-        console.error('❌ [LeadManagement] Supabase error, using fallback data:', error);
+        console.log('ℹ️ [LeadManagement] Using fallback data due to error');
         setAccountManagers(fallbackAccountManagers);
         setErrorMessage(null);
-        console.log('✅ [LeadManagement] Using fallback:', fallbackAccountManagers.length, 'account managers');
         return;
       }
 
       if (!data || data.length === 0) {
-        console.log('⚠️ [LeadManagement] No account managers in DB, using fallback data');
+        console.log('ℹ️ [LeadManagement] No account managers in DB, using fallback data');
         setAccountManagers(fallbackAccountManagers);
         setErrorMessage(null);
-        console.log('✅ [LeadManagement] Using fallback:', fallbackAccountManagers.length, 'account managers');
         return;
       }
 

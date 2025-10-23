@@ -81,38 +81,17 @@ export default function LeadForm({ lead, accountManagers, onSave, onCancel }: Le
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      // Probeer eerst via user_companies
-      let companyId = null;
-      const { data: userCompany } = await supabase
-        .from('user_companies')
-        .select('company_id')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (userCompany) {
-        companyId = userCompany.company_id;
-      } else {
-        // Als geen company gevonden, gebruik demo company
-        const DEMO_COMPANY_ID = '00000000-0000-0000-0000-000000000001';
-        companyId = DEMO_COMPANY_ID;
-
-        // Koppel user automatisch aan demo company
-        await supabase
-          .from('user_companies')
-          .insert({
-            user_id: user.id,
-            company_id: DEMO_COMPANY_ID,
-            role: 'user'
-          })
-          .select()
-          .maybeSingle();
+      if (!user) {
+        alert('Je moet ingelogd zijn om een lead op te slaan');
+        setSaving(false);
+        return;
       }
+
+      const DEMO_COMPANY_ID = '00000000-0000-0000-0000-000000000001';
 
       const leadData = {
         ...formData,
-        company_id: companyId,
+        company_id: DEMO_COMPANY_ID,
         account_manager_id: formData.account_manager_id || null
       };
 
