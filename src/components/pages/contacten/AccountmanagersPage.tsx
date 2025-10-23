@@ -15,12 +15,28 @@ export function AccountmanagersPage() {
 
   const loadAccountManagers = async () => {
     try {
-      console.log('🔍 [AccountmanagersPage] Loading account managers...');
+      console.log('🔍 [AccountmanagersPage] Loading account managers from sales_team...');
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('❌ [AccountmanagersPage] No authenticated user');
+        setAccountManagers(fallbackAccountManagers);
+        setLoading(false);
+        return;
+      }
+
+      const { data: userData } = await supabase
+        .from('users')
+        .select('company_id')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      const companyId = userData?.company_id || '00000000-0000-0000-0000-000000000001';
 
       const { data, error } = await supabase
-        .from('team_members')
+        .from('sales_team')
         .select('*')
-        .eq('role', 'sales')
+        .eq('company_id', companyId)
         .order('first_name');
 
       console.log('📊 [AccountmanagersPage] Query result:', {

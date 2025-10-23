@@ -62,10 +62,26 @@ export function TeamPage({ category }: TeamPageProps) {
   const loadTeamMembers = async () => {
     setLoading(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('No authenticated user');
+        setLoading(false);
+        return;
+      }
+
+      const { data: userData } = await supabase
+        .from('users')
+        .select('company_id')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      const companyId = userData?.company_id || '00000000-0000-0000-0000-000000000001';
+
       const roleFilter = getRoleFilter();
       let query = supabase
-        .from('team_members')
+        .from('sales_team')
         .select('*')
+        .eq('company_id', companyId)
         .eq('is_active', true)
         .order('first_name');
 

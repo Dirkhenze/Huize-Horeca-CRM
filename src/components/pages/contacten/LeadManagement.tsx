@@ -52,12 +52,28 @@ export default function LeadManagement() {
 
   const loadAccountManagers = async () => {
     try {
-      console.log('🔍 [LeadManagement] Starting to load account managers...');
+      console.log('🔍 [LeadManagement] Starting to load account managers from sales_team...');
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('❌ [LeadManagement] No authenticated user');
+        setAccountManagers(fallbackAccountManagers);
+        return;
+      }
+
+      const { data: userData } = await supabase
+        .from('users')
+        .select('company_id')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      const companyId = userData?.company_id || '00000000-0000-0000-0000-000000000001';
+      console.log('🏢 [LeadManagement] Using company_id:', companyId);
 
       const { data, error } = await supabase
-        .from('team_members')
+        .from('sales_team')
         .select('*')
-        .eq('role', 'sales')
+        .eq('company_id', companyId)
         .eq('is_active', true)
         .order('first_name');
 
@@ -81,7 +97,7 @@ export default function LeadManagement() {
 
       setAccountManagers(data);
       setErrorMessage(null);
-      console.log('✅ [LeadManagement] Successfully loaded', data.length, 'account managers from DB');
+      console.log('✅ [LeadManagement] Successfully loaded', data.length, 'account managers from sales_team');
     } catch (error: any) {
       console.error('❌ [LeadManagement] Critical error, using fallback:', error);
       setAccountManagers(fallbackAccountManagers);

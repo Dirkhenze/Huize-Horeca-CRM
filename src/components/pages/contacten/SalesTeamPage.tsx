@@ -25,17 +25,34 @@ export default function SalesTeamPage() {
     try {
       setLoading(true);
 
+      const companyId = '00000000-0000-0000-0000-000000000001';
+      console.log('[SalesTeamPage] Company ID:', companyId);
+
+      // First, let's check what's in the table WITHOUT filters
+      const { data: allData, error: allError } = await supabase
+        .from('sales_team')
+        .select('*');
+
+      console.log('[SalesTeamPage] ALL sales_team data (no filter):', allData?.length, 'members');
+      console.log('[SalesTeamPage] Sample data:', allData?.slice(0, 2));
+
+      // Now try with the company_id filter
       const { data, error } = await supabase
         .from('sales_team')
         .select('*')
+        .eq('company_id', companyId)
         .order('employee_number');
 
-      if (error) throw error;
+      if (error) {
+        console.error('[SalesTeamPage] Error loading sales team:', error);
+        throw error;
+      }
 
-      console.log('[SalesTeamPage] Loaded sales team:', data?.length, 'members');
+      console.log('[SalesTeamPage] Loaded sales team (filtered):', data?.length, 'members');
+      console.log('[SalesTeamPage] Filtered data:', data);
       setSalesTeam(data || []);
     } catch (error) {
-      console.error('Error loading sales team:', error);
+      console.error('[SalesTeamPage] Exception:', error);
     } finally {
       setLoading(false);
     }

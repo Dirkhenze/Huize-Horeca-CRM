@@ -38,10 +38,10 @@ export default function TimelineView({ leadId, timeline, onUpdate, accountManage
       if (!user) throw new Error('Not authenticated');
 
       const { data: teamMember } = await supabase
-        .from('team_members')
+        .from('sales_team')
         .select('id')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       const { error } = await supabase
         .from('tijdlijnacties')
