@@ -83,17 +83,36 @@ export default function LeadForm({ lead, accountManagers, onSave, onCancel }: Le
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const { data: teamMember } = await supabase
-        .from('team_members')
+      // Probeer eerst via user_companies
+      let companyId = null;
+      const { data: userCompany } = await supabase
+        .from('user_companies')
         .select('company_id')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (!teamMember) throw new Error('No company found');
+      if (userCompany) {
+        companyId = userCompany.company_id;
+      } else {
+        // Als geen company gevonden, gebruik demo company
+        const DEMO_COMPANY_ID = '00000000-0000-0000-0000-000000000001';
+        companyId = DEMO_COMPANY_ID;
+
+        // Koppel user automatisch aan demo company
+        await supabase
+          .from('user_companies')
+          .insert({
+            user_id: user.id,
+            company_id: DEMO_COMPANY_ID,
+            role: 'user'
+          })
+          .select()
+          .maybeSingle();
+      }
 
       const leadData = {
         ...formData,
-        company_id: teamMember.company_id,
+        company_id: companyId,
         account_manager_id: formData.account_manager_id || null
       };
 
@@ -115,7 +134,7 @@ export default function LeadForm({ lead, accountManagers, onSave, onCancel }: Le
       onSave();
     } catch (error) {
       console.error('Error saving lead:', error);
-      alert('Fout bij opslaan van lead');
+      alert(`Fout bij opslaan van lead: ${error instanceof Error ? error.message : 'Onbekende fout'}`);
     } finally {
       setSaving(false);
     }

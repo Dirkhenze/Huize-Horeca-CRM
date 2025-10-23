@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Users, Plus, Search, Filter, Mail, Phone, Edit, Trash2, LayoutList, LayoutGrid } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { SalesTeamMember } from '../../../lib/types';
+import { useAuth } from '../../../contexts/AuthContext';
 
 type ViewMode = 'list' | 'kanban';
 
 export default function SalesTeamPage() {
+  const { user } = useAuth();
   const [salesTeam, setSalesTeam] = useState<SalesTeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
@@ -14,18 +16,32 @@ export default function SalesTeamPage() {
   const [showAddForm, setShowAddForm] = useState(false);
 
   useEffect(() => {
-    loadSalesTeam();
-  }, []);
+    if (user) {
+      loadSalesTeam();
+    }
+  }, [user]);
 
   const loadSalesTeam = async () => {
     try {
       setLoading(true);
+
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('company_id')
+        .eq('id', user?.id)
+        .single();
+
+      if (userError) throw userError;
+
       const { data, error } = await supabase
         .from('sales_team')
         .select('*')
+        .eq('company_id', userData.company_id)
         .order('first_name');
 
       if (error) throw error;
+
+      console.log('[SalesTeamPage] Loaded sales team:', data?.length, 'members');
       setSalesTeam(data || []);
     } catch (error) {
       console.error('Error loading sales team:', error);
