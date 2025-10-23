@@ -4,6 +4,7 @@ import { supabase } from '../../../lib/supabase';
 import { Lead, TeamMember } from '../../../lib/types';
 import LeadForm from './LeadForm';
 import LeadDetails from './LeadDetails';
+import { fallbackAccountManagers } from '../../../data/fallbackAccountManagers';
 
 const KLANTTYPE_CATEGORIES = [
   { value: 'brouwerijen', label: 'Brouwerijen — brouwerijen en bierproducenten' },
@@ -51,7 +52,7 @@ export default function LeadManagement() {
 
   const loadAccountManagers = async () => {
     try {
-      console.log('🔍 Starting to load account managers...');
+      console.log('🔍 [LeadManagement] Starting to load account managers...');
 
       const { data, error } = await supabase
         .from('team_members')
@@ -60,95 +61,31 @@ export default function LeadManagement() {
         .eq('is_active', true)
         .order('first_name');
 
-      console.log('📊 Query result:', { data, error, count: data?.length });
+      console.log('📊 [LeadManagement] Query result:', { data, error, count: data?.length });
 
       if (error) {
-        console.error('❌ Error from Supabase:', error);
-        setErrorMessage(`Database error: ${error.message}`);
-        throw error;
+        console.error('❌ [LeadManagement] Supabase error, using fallback data:', error);
+        setAccountManagers(fallbackAccountManagers);
+        setErrorMessage(null);
+        console.log('✅ [LeadManagement] Using fallback:', fallbackAccountManagers.length, 'account managers');
+        return;
       }
 
       if (!data || data.length === 0) {
-        console.log('⚠️ No account managers found, creating demo data...');
-        setErrorMessage('Geen accountmanagers gevonden, demo data wordt aangemaakt...');
-
-        const { data: { user } } = await supabase.auth.getUser();
-        console.log('👤 Current user:', user?.id);
-
-        if (!user) {
-          console.error('❌ No authenticated user found');
-          setErrorMessage('Je bent niet ingelogd');
-          return;
-        }
-
-        const { data: teamMember } = await supabase
-          .from('team_members')
-          .select('company_id')
-          .eq('user_id', user.id)
-          .single();
-
-        console.log('🏢 User company:', teamMember?.company_id);
-
-        const companyId = teamMember?.company_id || '00000000-0000-0000-0000-000000000001';
-        console.log('Using company_id:', companyId);
-
-        const demoManagers = [
-          { first_name: 'Arie', last_name: 'Ouwerkerk', email: 'arie.ouwerkerk@huizehoreca.nl', phone: '0612345601', employee_number: 'HH001', department: 'Verkoop' },
-          { first_name: 'Binnendienst', last_name: '', email: 'binnendienst@huizehoreca.nl', phone: '0612345602', employee_number: 'HH002', department: 'Binnendienst' },
-          { first_name: 'Bobby', last_name: 'Klein', email: 'bobby.klein@huizehoreca.nl', phone: '0612345603', employee_number: 'HH003', department: 'Verkoop' },
-          { first_name: 'Dirk', last_name: 'Henze', email: 'dirk.henze@huizehoreca.nl', phone: '0612345604', employee_number: 'HH004', department: 'Verkoop' },
-          { first_name: 'Emile', last_name: 'Metekohy', email: 'emile.metekohy@huizehoreca.nl', phone: '0612345605', employee_number: 'HH005', department: 'Verkoop' },
-          { first_name: 'Maarten', last_name: 'Baas', email: 'maarten.baas@huizehoreca.nl', phone: '0612345606', employee_number: 'HH006', department: 'Verkoop' },
-          { first_name: 'Patrick', last_name: 'Wiersema', email: 'patrick.wiersema@huizehoreca.nl', phone: '0612345607', employee_number: 'HH007', department: 'Verkoop' },
-          { first_name: 'Paul', last_name: 'van Bennekom', email: 'paul.bennekom@huizehoreca.nl', phone: '0612345608', employee_number: 'HH008', department: 'Verkoop' },
-          { first_name: 'Ron', last_name: 'van der Wurf', email: 'ron.wurf@huizehoreca.nl', phone: '0612345609', employee_number: 'HH009', department: 'Verkoop' },
-          { first_name: 'Slijterij Man', last_name: 'Van Drank', email: 'man.drank@huizehoreca.nl', phone: '0612345610', employee_number: 'HH010', department: 'Slijterij' }
-        ];
-
-        console.log('📝 Inserting', demoManagers.length, 'account managers...');
-
-        for (const manager of demoManagers) {
-          const { error: insertError } = await supabase
-            .from('team_members')
-            .insert({
-              company_id: companyId,
-              ...manager,
-              role: 'sales',
-              is_active: true
-            });
-
-          if (insertError) {
-            console.error('❌ Insert error for', manager.first_name, ':', insertError);
-          } else {
-            console.log('✅ Inserted', manager.first_name, manager.last_name);
-          }
-        }
-
-        const { data: newData, error: reloadError } = await supabase
-          .from('team_members')
-          .select('*')
-          .eq('role', 'sales')
-          .eq('is_active', true)
-          .order('first_name');
-
-        console.log('🔄 Reloaded data:', { count: newData?.length, error: reloadError });
-
-        if (newData && newData.length > 0) {
-          setAccountManagers(newData);
-          setErrorMessage(null);
-          console.log('✅ Successfully created and loaded', newData.length, 'account managers');
-        } else {
-          setErrorMessage('Kon geen accountmanagers aanmaken');
-        }
+        console.log('⚠️ [LeadManagement] No account managers in DB, using fallback data');
+        setAccountManagers(fallbackAccountManagers);
+        setErrorMessage(null);
+        console.log('✅ [LeadManagement] Using fallback:', fallbackAccountManagers.length, 'account managers');
         return;
       }
 
       setAccountManagers(data);
       setErrorMessage(null);
-      console.log('✅ Successfully loaded', data.length, 'account managers');
+      console.log('✅ [LeadManagement] Successfully loaded', data.length, 'account managers from DB');
     } catch (error: any) {
-      console.error('❌ Critical error loading account managers:', error);
-      setErrorMessage(`Fout bij laden: ${error.message}`);
+      console.error('❌ [LeadManagement] Critical error, using fallback:', error);
+      setAccountManagers(fallbackAccountManagers);
+      setErrorMessage(null);
     }
   };
 

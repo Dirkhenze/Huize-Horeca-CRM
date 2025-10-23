@@ -35,6 +35,8 @@ const HERKOMST_OPTIONS = [
 ];
 
 export default function LeadForm({ lead, accountManagers, onSave, onCancel }: LeadFormProps) {
+  console.log('🎨 [LeadForm] Rendering with', accountManagers?.length || 0, 'account managers');
+
   const [formData, setFormData] = useState({
     datum_invoer: lead?.datum_invoer || new Date().toISOString().split('T')[0],
     accountmanager_id: lead?.accountmanager_id || '',
@@ -164,12 +166,21 @@ export default function LeadForm({ lead, accountManagers, onSave, onCancel }: Le
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Selecteer accountmanager</option>
-                {accountManagers.map(manager => (
-                  <option key={manager.id} value={manager.id}>
-                    {manager.first_name} {manager.last_name}
-                  </option>
-                ))}
+                {accountManagers && accountManagers.length > 0 ? (
+                  accountManagers.map(manager => (
+                    <option key={manager.id} value={manager.id}>
+                      {manager.first_name} {manager.last_name}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>Geen accountmanagers beschikbaar</option>
+                )}
               </select>
+              {accountManagers && accountManagers.length === 0 && (
+                <p className="mt-1 text-sm text-orange-600">
+                  ⚠️ Geen accountmanagers geladen. Voer eerst de SQL fix uit.
+                </p>
+              )}
             </div>
 
             <div>

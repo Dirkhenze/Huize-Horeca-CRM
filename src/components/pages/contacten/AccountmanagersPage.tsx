@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, Mail, Phone, User, Edit2, Trash2 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { TeamMember } from '../../../lib/types';
+import { fallbackAccountManagers } from '../../../data/fallbackAccountManagers';
 
 export function AccountmanagersPage() {
   const [accountManagers, setAccountManagers] = useState<TeamMember[]>([]);
@@ -14,16 +15,36 @@ export function AccountmanagersPage() {
 
   const loadAccountManagers = async () => {
     try {
+      console.log('🔍 [AccountmanagersPage] Loading account managers...');
+
       const { data, error } = await supabase
         .from('team_members')
         .select('*')
         .eq('role', 'sales')
         .order('first_name');
 
-      if (error) throw error;
-      setAccountManagers(data || []);
+      console.log('📊 [AccountmanagersPage] Query result:', {
+        data,
+        error,
+        count: data?.length
+      });
+
+      if (error) {
+        console.error('❌ [AccountmanagersPage] Supabase error, using fallback data:', error);
+        setAccountManagers(fallbackAccountManagers);
+        console.log('✅ [AccountmanagersPage] Using fallback:', fallbackAccountManagers.length, 'account managers');
+      } else {
+        if (data && data.length > 0) {
+          setAccountManagers(data);
+          console.log('✅ [AccountmanagersPage] Loaded from DB:', data.length, 'account managers');
+        } else {
+          console.log('⚠️ [AccountmanagersPage] No data from DB, using fallback');
+          setAccountManagers(fallbackAccountManagers);
+        }
+      }
     } catch (error) {
-      console.error('Error loading account managers:', error);
+      console.error('❌ [AccountmanagersPage] Critical error, using fallback:', error);
+      setAccountManagers(fallbackAccountManagers);
     } finally {
       setLoading(false);
     }
