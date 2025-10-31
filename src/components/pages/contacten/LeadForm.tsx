@@ -82,54 +82,18 @@ export default function LeadForm({ lead, accountManagers, onSave, onCancel }: Le
     setSaving(true);
 
     try {
+      if (!user) {
+        alert('Je moet ingelogd zijn om een lead op te slaan');
+        setSaving(false);
+        return;
+      }
+
       const DEMO_COMPANY_ID = '00000000-0000-0000-0000-000000000001';
 
       const leadData = {
+        ...formData,
         company_id: DEMO_COMPANY_ID,
-        company_name: formData.company_name,
-        customer_type: formData.customer_type || null,
-        account_manager_id: formData.account_manager_id || null,
-
-        address: formData.address || null,
-        postal_code: formData.postal_code || null,
-        city: formData.city || null,
-        region: formData.region || null,
-        delivery_address: formData.delivery_address || null,
-
-        delivery_preference_days: formData.delivery_preference_days || null,
-        delivery_time_slots: formData.delivery_time_slots || null,
-        delivery_instructions: formData.delivery_instructions || null,
-
-        contact_person: formData.contact_person,
-        email: formData.email || null,
-        phone: formData.phone || null,
-        contact_role: formData.contact_role || null,
-        secondary_contact_name: formData.secondary_contact_name || null,
-        secondary_contact_email: formData.secondary_contact_email || null,
-        secondary_contact_phone: formData.secondary_contact_phone || null,
-
-        iban: formData.iban || null,
-        account_holder_name: formData.account_holder_name || null,
-        payment_terms: formData.payment_terms || null,
-        btw_number: formData.btw_number || null,
-
-        assortment_interests: formData.assortment_interests || null,
-        business_notes: formData.business_notes || null,
-
-        status: formData.status,
-        notes: formData.notes || null,
-
-        // Voor oude velden mapping
-        bedrijfsnaam: formData.company_name,
-        contactpersoon: formData.contact_person,
-        email_algemeen: formData.email || null,
-        telefoonnummer: formData.phone || null,
-        straat_huisnummer: formData.address || null,
-        postcode: formData.postal_code || null,
-        plaats: formData.city || null,
-        klanttype: formData.customer_type || null,
-        accountmanager_id: formData.account_manager_id || null,
-        tenaamstelling: formData.account_holder_name || null
+        account_manager_id: formData.account_manager_id || null
       };
 
       if (lead) {

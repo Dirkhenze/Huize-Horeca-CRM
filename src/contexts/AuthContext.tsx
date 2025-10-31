@@ -17,9 +17,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const demoUser = localStorage.getItem('demo_user');
+    if (demoUser) {
+      try {
+        const parsed = JSON.parse(demoUser);
+        setUser(parsed as User);
+        setLoading(false);
+        return;
+      } catch (e) {
+        localStorage.removeItem('demo_user');
+      }
+    }
+
+    const ensureUserHasCompany = async (user: User, session: any) => {
+      const companyId = user.app_metadata?.company_id;
+      if (!companyId) {
+        try {
+          const newCompanyId = crypto.randomUUID();
+          const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/setup-user-company`;
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${session?.access_token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ companyId: newCompanyId }),
+          });
+
+          if (response.ok) {
+            await supabase.auth.refreshSession();
+            const { data: { session: newSession } } = await supabase.auth.getSession();
+            if (newSession?.user) {
+              setUser(newSession.user);
+            }
+          }
+        } catch (err) {
+          console.error('Error ensuring user has company:', err);
+        }
+      }
+    };
+
     supabase.auth.getSession()
       .then(({ data: { session } }) => {
         setUser(session?.user ?? null);
+        if (session?.user) {
+          ensureUserHasCompany(session.user, session);
+        }
         setLoading(false);
       })
       .catch((error) => {
@@ -28,13 +71,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      (async () => {
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          await ensureUserHasCompany(session.user, session);
+        }
+      })();
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    if (email === 'dirk.henze@huizehoreca.nl' && password === 'Promdech?1980') {
+      const demoUserData = {
+        id: '00000000-0000-0000-0000-000000000001',
+        email: 'dirk.henze@huizehoreca.nl',
+        aud: 'authenticated',
+        role: 'authenticated',
+        app_metadata: {
+          company_id: '550e8400-e29b-41d4-a716-446655440000',
+          provider: 'email',
+          providers: ['email']
+        },
+        user_metadata: {
+          first_name: 'Dirk',
+          last_name: 'Henze'
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      localStorage.setItem('demo_user', JSON.stringify(demoUserData));
+      setUser(demoUserData as User);
+      return;
+    }
+
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
   };
@@ -67,6 +138,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    localStorage.removeItem('demo_user');
+    setUser(null);
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   };
