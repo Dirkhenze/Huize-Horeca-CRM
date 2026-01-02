@@ -124,6 +124,28 @@ export default function SalesTeamPage() {
     }
   };
 
+  const handleAddMember = async (newMember: Partial<SalesTeamMember>) => {
+    try {
+      const companyId = '00000000-0000-0000-0000-000000000001';
+
+      const { error } = await supabase
+        .from('sales_team')
+        .insert({
+          ...newMember,
+          company_id: companyId,
+          is_active: true,
+        });
+
+      if (error) throw error;
+
+      setShowAddForm(false);
+      await loadSalesTeam();
+    } catch (error) {
+      console.error('Error adding member:', error);
+      alert('Fout bij toevoegen van teamlid');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -345,6 +367,107 @@ export default function SalesTeamPage() {
           </div>
         )}
       </div>
+
+      {showAddForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+            <h2 className="text-xl font-bold mb-4">Nieuw teamlid toevoegen</h2>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              handleAddMember({
+                first_name: formData.get('first_name') as string,
+                last_name: formData.get('last_name') as string,
+                email: formData.get('email') as string,
+                phone: formData.get('phone') as string || null,
+                function_title: formData.get('function_title') as string,
+                team_name: formData.get('team_name') as string,
+                employee_number: formData.get('employee_number') as string || null,
+              });
+            }}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Voornaam *</label>
+                  <input
+                    type="text"
+                    name="first_name"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Achternaam *</label>
+                  <input
+                    type="text"
+                    name="last_name"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Telefoonnummer</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Medewerkernummer</label>
+                  <input
+                    type="text"
+                    name="employee_number"
+                    placeholder="bijv. AM-004"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Functie</label>
+                  <input
+                    type="text"
+                    name="function_title"
+                    placeholder="bijv. Account Manager"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Team</label>
+                  <input
+                    type="text"
+                    name="team_name"
+                    placeholder="bijv. Sales"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Annuleren
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Toevoegen
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {showEditForm && editingMember && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

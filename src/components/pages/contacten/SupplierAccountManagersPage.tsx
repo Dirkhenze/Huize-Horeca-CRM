@@ -18,6 +18,9 @@ export default function SupplierAccountManagersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
   const [filterSupplier, setFilterSupplier] = useState<string>('all');
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingAM, setEditingAM] = useState<SupplierAccountManager | null>(null);
+  const [showEditForm, setShowEditForm] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -84,6 +87,82 @@ export default function SupplierAccountManagersPage() {
     return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
   };
 
+  const handleAddAM = async (newAM: Partial<SupplierAccountManager>) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: userData } = await supabase
+        .from('users')
+        .select('company_id')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      const companyId = userData?.company_id || '00000000-0000-0000-0000-000000000001';
+
+      const { error } = await supabase
+        .from('supplier_account_managers')
+        .insert({
+          ...newAM,
+          company_id: companyId,
+          is_active: true,
+        });
+
+      if (error) throw error;
+
+      setShowAddForm(false);
+      await loadData();
+    } catch (error) {
+      console.error('Error adding supplier account manager:', error);
+      alert('Fout bij toevoegen van accountmanager');
+    }
+  };
+
+  const handleEdit = (am: SupplierAccountManager) => {
+    setEditingAM(am);
+    setShowEditForm(true);
+  };
+
+  const handleSaveEdit = async (updatedAM: Partial<SupplierAccountManager>) => {
+    if (!editingAM) return;
+
+    try {
+      const { error } = await supabase
+        .from('supplier_account_managers')
+        .update(updatedAM)
+        .eq('id', editingAM.id);
+
+      if (error) throw error;
+
+      setShowEditForm(false);
+      setEditingAM(null);
+      await loadData();
+    } catch (error) {
+      console.error('Error updating supplier account manager:', error);
+      alert('Fout bij updaten van accountmanager');
+    }
+  };
+
+  const handleDelete = async (am: SupplierAccountManager) => {
+    if (!confirm(`Weet je zeker dat je ${am.first_name} ${am.last_name} wilt verwijderen?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('supplier_account_managers')
+        .delete()
+        .eq('id', am.id);
+
+      if (error) throw error;
+
+      await loadData();
+    } catch (error) {
+      console.error('Error deleting supplier account manager:', error);
+      alert('Fout bij verwijderen van accountmanager');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -92,6 +171,7 @@ export default function SupplierAccountManagersPage() {
           <p className="text-gray-600 mt-1">Beheer externe accountmanagers van leveranciers</p>
         </div>
         <button
+          onClick={() => setShowAddForm(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
         >
           <Plus className="w-5 h-5" />
@@ -236,10 +316,16 @@ export default function SupplierAccountManagersPage() {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
-                        <button className="p-1 text-gray-400 hover:text-blue-600 transition-colors">
+                        <button
+                          onClick={() => handleEdit(am)}
+                          className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                        >
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button className="p-1 text-gray-400 hover:text-red-600 transition-colors">
+                        <button
+                          onClick={() => handleDelete(am)}
+                          className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                        >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -309,10 +395,16 @@ export default function SupplierAccountManagersPage() {
                     {am.is_active ? 'Actief' : 'Inactief'}
                   </span>
                   <div className="flex items-center gap-1">
-                    <button className="p-1 text-gray-400 hover:text-blue-600 transition-colors">
+                    <button
+                      onClick={() => handleEdit(am)}
+                      className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                    >
                       <Edit className="w-4 h-4" />
                     </button>
-                    <button className="p-1 text-gray-400 hover:text-red-600 transition-colors">
+                    <button
+                      onClick={() => handleDelete(am)}
+                      className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -328,6 +420,194 @@ export default function SupplierAccountManagersPage() {
           </div>
         )}
       </div>
+
+      {showAddForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4">Nieuwe accountmanager toevoegen</h2>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              handleAddAM({
+                first_name: formData.get('first_name') as string,
+                last_name: formData.get('last_name') as string,
+                email: formData.get('email') as string,
+                phone: formData.get('phone') as string || null,
+                mobile: formData.get('mobile') as string || null,
+                function_title: formData.get('function_title') as string,
+              });
+            }}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Voornaam *</label>
+                  <input
+                    type="text"
+                    name="first_name"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Achternaam *</label>
+                  <input
+                    type="text"
+                    name="last_name"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Telefoon</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Mobiel</label>
+                  <input
+                    type="tel"
+                    name="mobile"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Functie</label>
+                  <input
+                    type="text"
+                    name="function_title"
+                    placeholder="bijv. Account Manager"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Annuleren
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Toevoegen
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showEditForm && editingAM && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4">Accountmanager bewerken</h2>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              handleSaveEdit({
+                first_name: formData.get('first_name') as string,
+                last_name: formData.get('last_name') as string,
+                email: formData.get('email') as string,
+                phone: formData.get('phone') as string || null,
+                mobile: formData.get('mobile') as string || null,
+                function_title: formData.get('function_title') as string,
+              });
+            }}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Voornaam</label>
+                  <input
+                    type="text"
+                    name="first_name"
+                    defaultValue={editingAM.first_name}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Achternaam</label>
+                  <input
+                    type="text"
+                    name="last_name"
+                    defaultValue={editingAM.last_name}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    defaultValue={editingAM.email}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Telefoon</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    defaultValue={editingAM.phone || ''}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Mobiel</label>
+                  <input
+                    type="tel"
+                    name="mobile"
+                    defaultValue={editingAM.mobile || ''}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Functie</label>
+                  <input
+                    type="text"
+                    name="function_title"
+                    defaultValue={editingAM.function_title || ''}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditForm(false);
+                    setEditingAM(null);
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Annuleren
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Opslaan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

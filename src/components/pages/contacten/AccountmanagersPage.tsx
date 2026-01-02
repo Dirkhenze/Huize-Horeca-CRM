@@ -8,6 +8,9 @@ export function AccountmanagersPage() {
   const [accountManagers, setAccountManagers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingManager, setEditingManager] = useState<TeamMember | null>(null);
+  const [showEditForm, setShowEditForm] = useState(false);
 
   useEffect(() => {
     loadAccountManagers();
@@ -78,6 +81,82 @@ export function AccountmanagersPage() {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
+  const handleAddManager = async (newManager: Partial<TeamMember>) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: userData } = await supabase
+        .from('users')
+        .select('company_id')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      const companyId = userData?.company_id || '00000000-0000-0000-0000-000000000001';
+
+      const { error } = await supabase
+        .from('sales_team')
+        .insert({
+          ...newManager,
+          company_id: companyId,
+          is_active: true,
+        });
+
+      if (error) throw error;
+
+      setShowAddForm(false);
+      await loadAccountManagers();
+    } catch (error) {
+      console.error('Error adding account manager:', error);
+      alert('Fout bij toevoegen van accountmanager');
+    }
+  };
+
+  const handleEdit = (manager: TeamMember) => {
+    setEditingManager(manager);
+    setShowEditForm(true);
+  };
+
+  const handleSaveEdit = async (updatedManager: Partial<TeamMember>) => {
+    if (!editingManager) return;
+
+    try {
+      const { error } = await supabase
+        .from('sales_team')
+        .update(updatedManager)
+        .eq('id', editingManager.id);
+
+      if (error) throw error;
+
+      setShowEditForm(false);
+      setEditingManager(null);
+      await loadAccountManagers();
+    } catch (error) {
+      console.error('Error updating account manager:', error);
+      alert('Fout bij updaten van accountmanager');
+    }
+  };
+
+  const handleDelete = async (manager: TeamMember) => {
+    if (!confirm(`Weet je zeker dat je ${manager.first_name} ${manager.last_name} wilt verwijderen?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('sales_team')
+        .delete()
+        .eq('id', manager.id);
+
+      if (error) throw error;
+
+      await loadAccountManagers();
+    } catch (error) {
+      console.error('Error deleting account manager:', error);
+      alert('Fout bij verwijderen van accountmanager');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -85,7 +164,10 @@ export function AccountmanagersPage() {
           <h1 className="text-2xl font-bold text-gray-900">Accountmanagers</h1>
           <p className="text-gray-600 mt-1">Beheer je sales team</p>
         </div>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+        <button
+          onClick={() => setShowAddForm(true)}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+        >
           <Plus className="w-4 h-4" />
           Nieuwe accountmanager
         </button>
@@ -202,12 +284,14 @@ export function AccountmanagersPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
                         <button
+                          onClick={() => handleEdit(manager)}
                           className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
                           title="Bewerken"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
+                          onClick={() => handleDelete(manager)}
                           className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                           title="Verwijderen"
                         >
@@ -230,6 +314,225 @@ export function AccountmanagersPage() {
           </div>
         )}
       </div>
+
+      {showAddForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4">Nieuwe accountmanager toevoegen</h2>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              handleAddManager({
+                first_name: formData.get('first_name') as string,
+                last_name: formData.get('last_name') as string,
+                email: formData.get('email') as string,
+                phone: formData.get('phone') as string || null,
+                function_title: formData.get('function_title') as string,
+                team_name: formData.get('team_name') as string,
+                department: formData.get('department') as string,
+                employee_number: formData.get('employee_number') as string || null,
+              });
+            }}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Voornaam *</label>
+                  <input
+                    type="text"
+                    name="first_name"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Achternaam *</label>
+                  <input
+                    type="text"
+                    name="last_name"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Telefoonnummer</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Medewerkernummer</label>
+                  <input
+                    type="text"
+                    name="employee_number"
+                    placeholder="bijv. AM-004"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Functie</label>
+                  <input
+                    type="text"
+                    name="function_title"
+                    placeholder="bijv. Account Manager"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Team</label>
+                  <input
+                    type="text"
+                    name="team_name"
+                    placeholder="bijv. Sales"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Afdeling</label>
+                  <input
+                    type="text"
+                    name="department"
+                    placeholder="bijv. Verkoop"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Annuleren
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Toevoegen
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showEditForm && editingManager && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4">Accountmanager bewerken</h2>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              handleSaveEdit({
+                first_name: formData.get('first_name') as string,
+                last_name: formData.get('last_name') as string,
+                email: formData.get('email') as string,
+                phone: formData.get('phone') as string || null,
+                function_title: formData.get('function_title') as string,
+                team_name: formData.get('team_name') as string,
+                department: formData.get('department') as string,
+              });
+            }}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Voornaam</label>
+                  <input
+                    type="text"
+                    name="first_name"
+                    defaultValue={editingManager.first_name}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Achternaam</label>
+                  <input
+                    type="text"
+                    name="last_name"
+                    defaultValue={editingManager.last_name}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    defaultValue={editingManager.email}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Telefoon</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    defaultValue={editingManager.phone || ''}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Functie</label>
+                  <input
+                    type="text"
+                    name="function_title"
+                    defaultValue={editingManager.function_title || ''}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Team</label>
+                  <input
+                    type="text"
+                    name="team_name"
+                    defaultValue={editingManager.team_name || ''}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Afdeling</label>
+                  <input
+                    type="text"
+                    name="department"
+                    defaultValue={editingManager.department || ''}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditForm(false);
+                    setEditingManager(null);
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Annuleren
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Opslaan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

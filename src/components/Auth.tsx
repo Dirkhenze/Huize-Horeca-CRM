@@ -3,20 +3,27 @@ import { LogIn, UserPlus } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 export function Auth() {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, resetPassword } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isResetPassword, setIsResetPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
     try {
-      if (isSignUp) {
+      if (isResetPassword) {
+        await resetPassword(email);
+        setSuccess('Wachtwoord reset link is verstuurd naar je email!');
+        setEmail('');
+      } else if (isSignUp) {
         await signUp(email, password);
       } else {
         await signIn(email, password);
@@ -45,7 +52,7 @@ export function Auth() {
             </div>
             <h1 className="text-3xl font-bold text-white mb-1">Huize Horeca</h1>
             <p className="text-white text-opacity-90 text-sm">
-              {isSignUp ? 'Maak een account aan' : 'Welkom terug'}
+              {isResetPassword ? 'Wachtwoord vergeten' : isSignUp ? 'Maak een account aan' : 'Welkom terug'}
             </p>
           </div>
         </div>
@@ -54,6 +61,11 @@ export function Auth() {
           {error && (
             <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-r text-sm">
               {error}
+            </div>
+          )}
+          {success && (
+            <div className="bg-green-50 border-l-4 border-green-500 text-green-700 px-4 py-3 rounded-r text-sm">
+              {success}
             </div>
           )}
 
@@ -72,21 +84,23 @@ export function Auth() {
             />
           </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-semibold text-slate-700 mb-2">
-              Wachtwoord
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="w-full px-4 py-3.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              placeholder="••••••••"
-            />
-          </div>
+          {!isResetPassword && (
+            <div>
+              <label htmlFor="password" className="block text-sm font-semibold text-slate-700 mb-2">
+                Wachtwoord
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="w-full px-4 py-3.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder="••••••••"
+              />
+            </div>
+          )}
 
           <button
             type="submit"
@@ -95,6 +109,8 @@ export function Auth() {
           >
             {loading ? (
               'Bezig...'
+            ) : isResetPassword ? (
+              'Reset Link Versturen'
             ) : isSignUp ? (
               <>
                 <UserPlus className="w-5 h-5" />
@@ -110,15 +126,34 @@ export function Auth() {
         </form>
 
         <div className="px-8 pb-8 pt-0 text-center border-t border-slate-100">
-          <div className="pt-6">
+          <div className="pt-6 space-y-3">
+            {!isResetPassword && !isSignUp && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsResetPassword(true);
+                  setError('');
+                  setSuccess('');
+                }}
+                className="huize-text-primary hover:huize-text-red text-sm font-semibold transition-colors block w-full"
+              >
+                Wachtwoord vergeten?
+              </button>
+            )}
             <button
+              type="button"
               onClick={() => {
-                setIsSignUp(!isSignUp);
+                if (isResetPassword) {
+                  setIsResetPassword(false);
+                } else {
+                  setIsSignUp(!isSignUp);
+                }
                 setError('');
+                setSuccess('');
               }}
-              className="huize-text-primary hover:huize-text-red text-sm font-semibold transition-colors"
+              className="huize-text-primary hover:huize-text-red text-sm font-semibold transition-colors block w-full"
             >
-              {isSignUp ? '← Terug naar inloggen' : 'Nog geen account? Aanmelden →'}
+              {isResetPassword ? '← Terug naar inloggen' : isSignUp ? '← Terug naar inloggen' : 'Nog geen account? Aanmelden →'}
             </button>
           </div>
         </div>
